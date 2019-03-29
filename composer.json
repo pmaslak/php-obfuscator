@@ -1,0 +1,28 @@
+{
+    "name": "pmaslak/php-obfuscator",
+    "description": "PHP obfuscator",
+    "type": "project",
+    "keywords": [
+        "obfuscator"
+    ],
+    "homepage": "http://maslak.it",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pawel Maslak",
+            "email": "pawel@maslak.it",
+            "homepage": "http://maslak.it",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "ext-tokenizer": "*",
+        "nikic/php-parser": "4.2"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Skeleton\\": "src/"
+        }
+    }
+}
+
