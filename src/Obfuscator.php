@@ -5,7 +5,6 @@
  */
 
 namespace pmaslak;
-use pmaslak\Configuration;
 
 
 class Obfuscator implements ObfuscatorInterface
@@ -16,7 +15,7 @@ class Obfuscator implements ObfuscatorInterface
     public $lastProcessTime = 0;
     private $configuration = [
         'debug' => false,
-        'files_target' => '',
+        'target' => '',
         'obfuscation_options' => []
     ];
 
@@ -29,9 +28,9 @@ class Obfuscator implements ObfuscatorInterface
 
     private function setObfuscatorDir(): void
     {
-        $arr = explode('/', __DIR__);
+        $arr = explode(DIRECTORY_SEPARATOR, __DIR__);
         array_pop($arr);
-        $this->direcotry = implode('/', $arr);
+        $this->direcotry = implode(DIRECTORY_SEPARATOR, $arr);
     }
 
     /**
@@ -60,8 +59,8 @@ class Obfuscator implements ObfuscatorInterface
             $this->configuration['debug'] = true;
         }
 
-        if (isset($config['files_target']) && !empty($config['files_target'])) {
-            $this->configuration['files_target'] = (string)$config['files_target'];
+        if (isset($config['target']) && !empty($config['target'])) {
+            $this->configuration['target'] = (string)$config['target'];
         }
 
         if (isset($config['obfuscation_options'])) {
@@ -69,64 +68,78 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
-    public function obfuscateFile(string $path)
+    public function obfuscateFile(string $path, string $newName)
     {
         $this->validateFile($path);
-        $this->processFile($path);
+        $this->processFile($path, $newName);
     }
 
-    public function obfuscateDirectory(string $path, bool $recursive = true)
+    public function obfuscateDirectory(string $path, $recursive = true)
     {
         $this->validateDirectory($path);
-        $this->processDirectory($path, $recursive);
+        $this->processDirectory($path, $this->configuration['target'], $recursive);
     }
 
     /**
-     * @todo throw exception if dsomething wrong -- also relative to configuration of plugin
      * @param $path
+     * @throws \Exception
      */
     private function validateDirectory($path)
     {
         if (!file_exists($path)) {
-            throw new Exception('File ' . $path  . ' does not exists or is not readable.');
+            throw new \Exception('File ' . $path  . ' does not exists or is not readable.');
         }
     }
 
     /**
-     * @todo throw exception if dsomething wrong -- also relative to configuration of plugin
      * @param $path
+     * @throws \Exception
      */
     private function validateFile($path)
     {
         if (!is_readable($path)) {
-            throw new Exception('File ' . $path  . ' does not exists or is not readable.');
+            throw new \Exception('File ' . $path  . ' does not exists or is not readable.');
         }
     }
 
-    /**
-     * @param string $directory
-     * @param bool $recursive
-     */
-    private function processDirectory($directory, bool $recursive = true)
+    private function createDirectory(string $directory)
     {
+        if (is_readable($directory)) {
+            return;
+        }
+
+        mkdir($directory);
+    }
+
+    /**
+     * @param $directory
+     * @param $target
+     * @param bool $recursive
+     * @throws \Exception
+     */
+    private function processDirectory($directory, $target, $recursive = true)
+    {
+        $this->createDirectory($target);
+
         foreach (new \DirectoryIterator($directory) as $fileInfo) {
             if ($fileInfo->isDot()) {
                 continue;
             }
 
             if ($fileInfo->isDir()) {
+                $newDir = $target . $fileInfo->getBasename() . DIRECTORY_SEPARATOR;
                 if ($recursive) {
-                    $this->processDirectory($fileInfo->getPathName() . DIRECTORY_SEPARATOR, $recursive);
+                    $this->processDirectory($fileInfo->getPathName() . DIRECTORY_SEPARATOR, $newDir, $recursive);
                 }
                 continue;
             }
 
             if ($fileInfo->isFile()) {
                 $fileName = $fileInfo->getFilename();
-                $mimetype = mime_content_type($directory . $fileName);
+                $mimetype = mime_content_type($directory . DIRECTORY_SEPARATOR . $fileName);
 
                 if ($mimetype == 'text/x-php') {
-                    $this->processFile($directory . $fileName);
+                    $this->runFileObfuscation($directory . $fileName, $target . $fileName);
                 }
             }
         }
@@ -134,9 +147,21 @@ class Obfuscator implements ObfuscatorInterface
 
     /**
      * @param $file
-     * @return bool
+     * @throws \Exception
      */
-    private function processFile($file)
+    private function processFile($file, $newName = null)
+    {
+        $arr = explode(DIRECTORY_SEPARATOR, $file);
+        $filename = array_pop($arr);
+
+        if (empty($newName)) {
+            $newName = $filename;
+        }
+
+        $this->runFileObfuscation($file, $this->configuration['target'] . $newName);
+    }
+
+    private function runFileObfuscation($source, $target)
     {
         $parameters = $this->configuration['obfuscation_options'];
         $parameters = array_map('trim', $parameters);
@@ -155,12 +180,10 @@ class Obfuscator implements ObfuscatorInterface
 
         $command = $this->getBaseCommand();
 
-        echo "\n\nRunning command: ". $command . $file . ' -o '  . $this->configuration['files_target'].$parameters."\n\n";
-
         try {
-            exec($command . $file . ' -o ' . $this->configuration['files_target'] . $parameters);
+            exec($command . $source . ' -o ' . $target . $parameters);
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage());
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -168,14 +191,5 @@ class Obfuscator implements ObfuscatorInterface
     {
         return 'php ' . $this->direcotry . '/src/yakpro/yakpro-po.php ';
     }
-
-//    private function done()
-//    {
-//        $executionTime = (microtime(true) - $this->timeStart);
-//        echo PHP_EOL . PHP_EOL . 'Processed ' . $this->processedFiles . ' files';
-//        echo PHP_EOL .'Total Execution Time: ' . $executionTime .' s';
-//        echo PHP_EOL . 'Done!' . PHP_EOL;
-//    }
-
 }
 

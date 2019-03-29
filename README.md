@@ -2,9 +2,8 @@
 
 Free, Open Source, Published under the MIT License.
 
-This tool parses php with the best existing php parser [PHP-Parser 1.x](https://github.com/nikic/PHP-Parser/tree/1.x),
-which is an awesome php parsing library written by [nikic](https://github.com/nikic).
-
+This tool is for commercial and non commercial usage. It basically cover all features of [yakpro-po](https://github.com/pk-fr/yakpro-po)
+under PHP library available from composer.
 
 ## Example usage
 ```php
@@ -16,8 +15,7 @@ $obfuscator->obfuscateFile('file_to_obfuscate.php');
 
 ```
 
-# Configuration
-## Other command line options:
+## Configuration
     no-strip-indentation              multi line output
     strip-indentation                 single line output
     

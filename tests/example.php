@@ -1,6 +1,5 @@
 <?php
 
-
 require __DIR__ . '/../vendor/autoload.php';
 
 require '../src/ObfuscatorInterface.php';
@@ -9,10 +8,11 @@ require '../src/Obfuscator.php';
 
 $obfuscator = new pmaslak\Obfuscator([
     'debug' => false,
-    'files_target' => 'obfuscated_file.php',
+    'target' => '/Users/pawelmaslak/Projects/obfuscator_git/obfuscation_result/',
     'obfuscation_options' => ['no-obfuscate-variable-name', 'no-obfuscate-method-name', 'no-obfuscate-class-name', 'no-obfuscate-property-name']
 ]);
-$obfuscator->obfuscateFile('file_to_obfuscate.php');
 
-//php yakpro-po.php ../../tests/file_to_obfuscate.php --debug --file_to_obfuscate2.php
+//$obfuscator->obfuscateFile('to_obfuscate/file_to_obfuscate.php', 'new_name.php');
+
+//$obfuscator->obfuscateDirectory('/Users/xyz/Projects/obfuscator_git/tests/to_obfuscate/');
 
