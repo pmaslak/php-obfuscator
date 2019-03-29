@@ -9,13 +9,13 @@ namespace pmaslak;
 
 class Obfuscator implements ObfuscatorInterface
 {
-    private $direcotry = '';
+    private $directory = '';
 
     public $processedFiles = 0;
     public $lastProcessTime = 0;
     private $configuration = [
         'debug' => false,
-        'target' => '',
+        'allowed_mime_types' => ['text/x-php'],
         'obfuscation_options' => []
     ];
 
@@ -30,7 +30,7 @@ class Obfuscator implements ObfuscatorInterface
     {
         $arr = explode(DIRECTORY_SEPARATOR, __DIR__);
         array_pop($arr);
-        $this->direcotry = implode(DIRECTORY_SEPARATOR, $arr);
+        $this->directory = implode(DIRECTORY_SEPARATOR, $arr);
     }
 
     /**
@@ -44,7 +44,7 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
-    public function setConfiguration(array $config)
+    public function setConfiguration(array $config): void
     {
         $this->injectConfiguration($config);
     }
@@ -53,14 +53,10 @@ class Obfuscator implements ObfuscatorInterface
      * inject new configuration into current object
      * @param array $config
      */
-    private function injectConfiguration(array $config)
+    private function injectConfiguration(array $config): void
     {
         if (isset($config['debug']) && $config['debug']) {
             $this->configuration['debug'] = true;
-        }
-
-        if (isset($config['target']) && !empty($config['target'])) {
-            $this->configuration['target'] = (string)$config['target'];
         }
 
         if (isset($config['obfuscation_options'])) {
@@ -68,16 +64,16 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
-    public function obfuscateFile(string $path, string $newName)
+    public function obfuscateFile(string $path, string $target)
     {
         $this->validateFile($path);
-        $this->processFile($path, $newName);
+        $this->processFile($path, $target);
     }
 
-    public function obfuscateDirectory(string $path, $recursive = true)
+    public function obfuscateDirectory(string $path, string $target, $recursive = true)
     {
         $this->validateDirectory($path);
-        $this->processDirectory($path, $this->configuration['target'], $recursive);
+        $this->processDirectory($path, $target, $recursive);
     }
 
     /**
@@ -102,6 +98,9 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
+    /**
+     * @param string $directory
+     */
     private function createDirectory(string $directory)
     {
         if (is_readable($directory)) {
@@ -138,30 +137,19 @@ class Obfuscator implements ObfuscatorInterface
                 $fileName = $fileInfo->getFilename();
                 $mimetype = mime_content_type($directory . DIRECTORY_SEPARATOR . $fileName);
 
-                if ($mimetype == 'text/x-php') {
-                    $this->runFileObfuscation($directory . $fileName, $target . $fileName);
+                if (in_array($mimetype, $this->configuration['allowed_mime_types'])) {
+                    $this->processFile($directory . $fileName, $target . $fileName);
                 }
             }
         }
     }
 
     /**
-     * @param $file
+     * @param $source
+     * @param $target
      * @throws \Exception
      */
-    private function processFile($file, $newName = null)
-    {
-        $arr = explode(DIRECTORY_SEPARATOR, $file);
-        $filename = array_pop($arr);
-
-        if (empty($newName)) {
-            $newName = $filename;
-        }
-
-        $this->runFileObfuscation($file, $this->configuration['target'] . $newName);
-    }
-
-    private function runFileObfuscation($source, $target)
+    private function processFile($source, $target)
     {
         $parameters = $this->configuration['obfuscation_options'];
         $parameters = array_map('trim', $parameters);
@@ -187,9 +175,9 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
-    private function getBaseCommand()
+    private function getBaseCommand(): string
     {
-        return 'php ' . $this->direcotry . '/src/yakpro/yakpro-po.php ';
+        return 'php ' . $this->directory . '/src/yakpro/yakpro-po.php ';
     }
 }
 

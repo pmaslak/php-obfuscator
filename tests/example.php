@@ -8,11 +8,11 @@ require '../src/Obfuscator.php';
 
 $obfuscator = new pmaslak\Obfuscator([
     'debug' => false,
-    'target' => '/Users/pawelmaslak/Projects/obfuscator_git/obfuscation_result/',
+    'allowed_mime_types' => ['text/x-php'],
     'obfuscation_options' => ['no-obfuscate-variable-name', 'no-obfuscate-method-name', 'no-obfuscate-class-name', 'no-obfuscate-property-name']
 ]);
 
-//$obfuscator->obfuscateFile('to_obfuscate/file_to_obfuscate.php', 'new_name.php');
 
-//$obfuscator->obfuscateDirectory('/Users/xyz/Projects/obfuscator_git/tests/to_obfuscate/');
+$obfuscator->obfuscateFile('/dir/example_file.php', '/new_dir/obfuscated_file.php');
+$obfuscator->obfuscateDirectory('/dir/to_obfuscate/', '/dir/obfuscated/');
 

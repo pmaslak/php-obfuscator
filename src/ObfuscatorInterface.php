@@ -12,6 +12,6 @@ interface ObfuscatorInterface
 {
     public function __construct(array $config);
 
-    public function obfuscateFile(string $path, string $newName);
-    public function obfuscateDirectory(string $path, $recursive);
+    public function obfuscateFile(string $path, string $target);
+    public function obfuscateDirectory(string $path, string $target, $recursive);
 }

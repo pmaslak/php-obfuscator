@@ -16,6 +16,8 @@
         }
     ],
     "require": {
+        "php": "^7.1",
+        "ext-fileinfo": "*",
         "ext-tokenizer": "*",
         "nikic/php-parser": "4.2"
     },

@@ -11,7 +11,10 @@ $obfuscator = new pmaslak\Obfuscator([
     'files_target' => 'obfuscated_file.php',
     'obfuscation_options' => ['no-obfuscate-variable-name', 'no-obfuscate-method-name', 'no-obfuscate-class-name', 'no-obfuscate-property-name']
 ]);
-$obfuscator->obfuscateFile('file_to_obfuscate.php');
+
+$obfuscator->obfuscateFile('/dir/example_file.php', '/new_dir/obfuscated_file.php');
+
+$obfuscator->obfuscateDirectory('/dir/to_obfuscate/', '/dir/obfuscated/');
 
 ```
 
