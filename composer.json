@@ -6,7 +6,6 @@
         "php",
         "obfuscator"
     ],
-    "homepage": "http://maslak.it",
     "license": "MIT",
     "authors": [
         {
@@ -22,9 +21,9 @@
         "ext-tokenizer": "*",
         "nikic/php-parser": "4.2"
     },
-    "autoload-dev": {
+    "autoload": {
         "psr-4": {
-            "pmaslak\\PhpObfuscator\\": "src/"
+            "pmaslak\\PhpObfuscator\\": "src"
         }
     }
 }
