@@ -112,7 +112,7 @@ class Config
         global $yakpro_po_version;
         $now = strftime("%F %T");
 
-        return sprintf($this->comment,$yakpro_po_version,$now);
+        return sprintf($this->comment, $yakpro_po_version, $now);
     }
 
     public function validate()

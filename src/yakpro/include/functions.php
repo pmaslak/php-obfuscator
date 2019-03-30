@@ -20,26 +20,23 @@ function obfuscate($filename)                   // takes a file_path as input, r
     $src_filename = $filename;
     $tmp_filename = $first_line = '';
     $t_source = file($filename);
-    if (substr($t_source[0],0,2)=='#!')
-    {
+    if (substr($t_source[0], 0, 2) == '#!') {
         $first_line = array_shift($t_source);
         $tmp_filename = tempnam(sys_get_temp_dir(), 'po-');
-        file_put_contents($tmp_filename,implode(PHP_EOL,$t_source));
+        file_put_contents($tmp_filename, implode(PHP_EOL, $t_source));
         $filename = $tmp_filename; // override 
     }
-    
-    try
-    {
+
+    try {
         $source = php_strip_whitespace($filename);
 //        fprintf(STDERR,"Obfuscating %s%s",$src_filename,PHP_EOL);
         //var_dump( token_get_all($source));    exit;
-        if ($source==='')
-        {
+        if ($source === '') {
             if ($conf->allow_and_overwrite_empty_files) return $source;
             throw new Exception("Error obfuscating [$src_filename]: php_strip_whitespace returned an empty string!");
         }
-        try
-        {
+
+        try {
             $stmts  = $parser->parse($source);  // PHP-Parser returns the syntax tree
         }
         catch (PhpParser\Error $e)                              // if an error occurs, then redo it without php_strip_whitespace, in order to display the right line number with error!
@@ -52,7 +49,9 @@ function obfuscate($filename)                   // takes a file_path as input, r
             $source = file_get_contents($filename);
             $stmts  = $parser->parse($source);
         }
-        if ($debug_mode) var_dump($stmts);
+        if ($debug_mode) {
+            var_dump($stmts);
+        }
 
         $stmts  = $traverser->traverse($stmts);                 //  Use PHP-Parser function to traverse the syntax tree and obfuscate names
         if ($conf->shuffle_stmts && (count($stmts)>2) )
@@ -83,20 +82,17 @@ function obfuscate($filename)                   // takes a file_path as input, r
 
         $code  = '<?php'.PHP_EOL;
 //        $code .= $conf->get_comment();                                          // comment obfuscated source
-        if (isset($conf->extract_comment_from_line) && isset($conf->extract_comment_to_line) )
-        {
+        if (isset($conf->extract_comment_from_line) && isset($conf->extract_comment_to_line)) {
             $t_source = file($filename);
-            for($i=$conf->extract_comment_from_line-1;$i<$conf->extract_comment_to_line;++$i) $code .= $t_source[$i];
+            for ($i = $conf->extract_comment_from_line - 1; $i < $conf->extract_comment_to_line; ++$i) $code .= $t_source[$i];
         }
-        if (isset($conf->user_comment))
-        {
-            $code .= '/*'.PHP_EOL.$conf->user_comment.PHP_EOL.'*/'.PHP_EOL;
+        if (isset($conf->user_comment)) {
+            $code .= '/*' . PHP_EOL . $conf->user_comment . PHP_EOL . '*/' . PHP_EOL;
         }
         $code .= $endcode;
-        
-        if (($tmp_filename!='') && ($first_line!=''))
-        {
-            $code = $first_line.$code;
+
+        if (($tmp_filename != '') && ($first_line != '')) {
+            $code = $first_line . $code;
             unlink($tmp_filename);
         }
         
@@ -111,12 +107,10 @@ function obfuscate($filename)                   // takes a file_path as input, r
 
 function check_preload_file($filename)                       // self-explanatory
 {
-    for($ok=false;;)
-    {
+    for ($ok = false; ;) {
         if (!file_exists($filename)) return false;
-        if (!is_readable($filename))
-        {
-            fprintf(STDERR,"Warning:[%s] is not readable!%s",$filename,PHP_EOL);
+        if (!is_readable($filename)) {
+            fprintf(STDERR, "Warning:[%s] is not readable!%s", $filename, PHP_EOL);
             return false;
         }
         $fp     = fopen($filename,"r"); if($fp===false) break;
@@ -132,11 +126,9 @@ function check_preload_file($filename)                       // self-explanatory
 
 function check_config_file($filename)                       // self-explanatory
 {
-    for($ok=false;;)
-    {
+    for ($ok = false; ;) {
         if (!file_exists($filename)) return false;
-        if (!is_readable($filename))
-        {
+        if (!is_readable($filename)) {
             fprintf(STDERR,"Warning:[%s] is not readable!%s",$filename,PHP_EOL);
             return false;
         }
@@ -153,11 +145,10 @@ function check_config_file($filename)                       // self-explanatory
 
 function create_context_directories($target_directory)      // self-explanatory
 {
-    foreach( array("$target_directory/yakpro-po","$target_directory/yakpro-po/obfuscated","$target_directory/yakpro-po/context") as $dummy => $dir)
-    {
+    foreach (array("$target_directory/yakpro-po", "$target_directory/yakpro-po/obfuscated", "$target_directory/yakpro-po/context") as $dummy => $dir) {
         if (!file_exists($dir)) mkdir($dir,0777,true);
-        if (!file_exists($dir))
-        {
+
+        if (!file_exists($dir)) {
             fprintf(STDERR,"Error:\tCannot create directory [%s]%s",$dir,PHP_EOL);
             exit(-1);
         }
@@ -169,10 +160,8 @@ function create_context_directories($target_directory)      // self-explanatory
 
 function remove_directory($path)                            // self-explanatory
 {
-    if ($dp = opendir($path))
-    {
-        while (($entry = readdir($dp)) !==  false )
-        {
+    if ($dp = opendir($path)) {
+        while (($entry = readdir($dp)) !== false) {
             if ($entry ==  ".") continue;
             if ($entry == "..") continue;
 
@@ -188,9 +177,11 @@ function remove_directory($path)                            // self-explanatory
 function confirm($str)                                  // self-explanatory not yet used ... rfu
 {
     global $conf;
-    if (!$conf->confirm) return true;
-    for(;;)
-    {
+    if (!$conf->confirm) {
+        return true;
+    }
+
+    for (; ;) {
         fprintf(STDERR,"%s [y/n] : ",$str);
         $r = strtolower(trim(fgets(STDIN)));
         if ($r=='y')    return true;
@@ -202,31 +193,28 @@ function obfuscate_directory($source_dir,$target_dir,$keep_mode=false)   // self
 {
     global $conf;
 
-    if (!$dp = opendir($source_dir))
-    {
+    if (!$dp = opendir($source_dir)) {
         fprintf(STDERR,"Error:\t [%s] directory does not exists!%s",$source_dir,PHP_EOL);
         exit(-1);
     }
-    $t_dir  = array();
-    $t_file = array();
-    while (($entry = readdir($dp)) !== false)
-    {
+    $t_dir = [];
+    $t_file = [];
+
+    while (($entry = readdir($dp)) !== false) {
         if ($entry == "." || $entry == "..")    continue;
 
         $new_keep_mode = $keep_mode;
 
         $source_path = "$source_dir/$entry";    $source_stat = @lstat($source_path);
         $target_path = "$target_dir/$entry";    $target_stat = @lstat($target_path);
-        if ($source_stat===false)
-        {
+        if ($source_stat === false) {
             fprintf(STDERR,"Error:\t cannot stat [%s] !%s",$source_path,PHP_EOL);
             exit(-1);
         }
 
         if (isset($conf->t_skip) && is_array($conf->t_skip) && in_array($source_path,$conf->t_skip))    continue;
 
-        if (is_link($source_path))
-        {
+        if (is_link($source_path)) {
             if ( ($target_stat!==false) && is_link($target_path) && ($source_stat['mtime']<=$target_stat['mtime']) )    continue;
             if (  $target_stat!==false  )
             {
@@ -244,14 +232,11 @@ function obfuscate_directory($source_dir,$target_dir,$keep_mode=false)   // self
             if (strtolower(PHP_OS)=='linux')    $x = `touch '$target_path' --no-dereference --reference='$source_path' `;
             continue;
         }
-        if (is_dir($source_path))
-        {
-            if ($target_stat!==false)
-            {
-                if (!is_dir($target_path))
-                {
-                    if (unlink($target_path)===false)
-                    {
+
+        if (is_dir($source_path)) {
+            if ($target_stat !== false) {
+                if (!is_dir($target_path)) {
+                    if (unlink($target_path) === false) {
                         fprintf(STDERR,"Error:\t cannot unlink [%s] !%s",$target_path,PHP_EOL);
                         exit(-1);
                     }
@@ -338,8 +323,7 @@ function shuffle_statements($stmts)
     $first_goto             = new PhpParser\Node\Stmt\Goto_($label_name_prev);
     $t                      = array();
     $t_chunk                = array();
-    for($i=0;$i<$n;++$i)
-    {
+    for ($i = 0; $i < $n; ++$i) {
         $t_chunk[]              = $stmts[$i];
         if (count($t_chunk)>=$chunk_size)
         {
@@ -351,8 +335,7 @@ function shuffle_statements($stmts)
             $t_chunk            = array();
         }
     }
-    if (count($t_chunk)>0)
-    {
+    if (count($t_chunk) > 0) {
         $label              = array(new PhpParser\Node\Stmt\Label($label_name_prev));
         $label_name         = $scrambler->scramble($scrambler->generate_label_name());
         $goto               = array(new PhpParser\Node\Stmt\Goto_($label_name));
@@ -363,10 +346,10 @@ function shuffle_statements($stmts)
     
     $last_label             = new PhpParser\Node\Stmt\Label($label_name);
     shuffle($t);
-    $stmts = array();
+    $stmts = [];
     $stmts[] = $first_goto;
-    foreach($t as $dummy => $stmt)
-    {
+
+    foreach ($t as $dummy => $stmt) {
         foreach($stmt as $dummy => $inst) $stmts[] = $inst;
     }
     $stmts[] = $last_label;

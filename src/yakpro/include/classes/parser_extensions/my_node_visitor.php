@@ -13,9 +13,9 @@
 
 class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing and replacement of scrambled names is done here!
 {                                                               // see PHP-Parser for documentation!
-    private $t_loop_stack                   = array();
-    private $current_class_name             = null;
-    private $is_in_class_const_definition   = false;
+    private $t_loop_stack = [];
+    private $current_class_name = null;
+    private $is_in_class_const_definition = false;
 
     private function shuffle_stmts(PhpParser\Node &$node)
     {
@@ -49,8 +49,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
     
     private function set_identifier_name(PhpParser\Node &$node,$name)
     {
-        if ($node instanceof PhpParser\Node\Identifier || $node instanceof PhpParser\Node\VarLikeIdentifier)
-        {
+        if ($node instanceof PhpParser\Node\Identifier || $node instanceof PhpParser\Node\VarLikeIdentifier) {
             $node->name = $name;
         }
     }
@@ -1010,16 +1009,14 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
 
             if ( ($node instanceof PhpParser\Node\Stmt\If_) )           // occurs when $conf->obfuscate_if_statement is set to false
             {
-                if (isset($node->{'else'}))
-                {
+                if (isset($node->{'else'})) {
                     if ($this->shuffle_stmts($node->{'else'}))  $node_modified  = true;
                 }
                 
                 $elseif                 = $node->elseifs;
                 if (isset($elseif) && count($elseif))       // elseif mode
                 {
-                    for($i=0;$i<count($elseif);++$i)
-                    {
+                    for ($i = 0; $i < count($elseif); ++$i) {
                         if ($this->shuffle_stmts($elseif[$i]))  $node_modified  = true;
                     }
                 }

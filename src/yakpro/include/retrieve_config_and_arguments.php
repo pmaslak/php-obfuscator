@@ -19,8 +19,8 @@ $config_filename        = '';
 $process_mode           = '';   // can be: 'file' or 'directory'
 
 $pos = array_search('-h',$t_args); if (!isset($pos) || ($pos===false)) $pos = array_search('--help',$t_args);
-if (isset($pos) && ($pos!==false) )
-{
+
+if (isset($pos) && ($pos !== false)) {
     fprintf(STDERR,"Info:\tyakpro-po version = %s%s",$yakpro_po_version,PHP_EOL.PHP_EOL);
     $lang = '';
     if (($x = getenv('LANG'))!==false) $s = strtolower($x); $x = explode('_',$x); $x = $x[0];
@@ -36,51 +36,46 @@ if (isset($pos) && ($pos!==false) )
 }
 
 $pos = array_search('--config-file',$t_args);
-if ( isset($pos) && ($pos!==false) && isset($t_args[$pos+1]) )
-{
+
+if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
     $argument_config_filename = $t_args[$pos+1];
     array_splice($t_args,$pos,2);           // remove the 2 args and reorder
 } else $argument_config_filename = '';
 
 $pos = array_search('-o',$t_args); if (!isset($pos) || ($pos===false)) $pos = array_search('--output-file',$t_args);
-if ( isset($pos) && ($pos!==false) && isset($t_args[$pos+1]) )
-{
+
+if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
     $target = $t_args[$pos+1];
     array_splice($t_args,$pos,2);           // remove the 2 args and reorder
 } else $target = '';
 
 $pos = array_search('--clean',$t_args);
-if (isset($pos) && ($pos!==false) )
-{
+if (isset($pos) && ($pos !== false)) {
     $clean_mode = true;
     array_splice($t_args,$pos,1);           // remove the arg and reorder
 } else $clean_mode = false;
 
 $pos = array_search('--silent',$t_args);
-if (isset($pos) && ($pos!==false) )
-{
+if (isset($pos) && ($pos !== false)) {
     $force_conf_silent = true;
     array_splice($t_args,$pos,1);           // remove the arg and reorder
 } else $force_conf_silent = false;;
 
 $pos = array_search('--whatis',$t_args);
-if ( isset($pos) && ($pos!==false) && isset($t_args[$pos+1]) )
-{
+if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
     $whatis = $t_args[$pos+1];
     array_splice($t_args,$pos,2);           // remove the 2 args and reorder
     $force_conf_silent = true;
 } else $whatis = '';
 
 $pos = array_search('--debug',$t_args);
-if (isset($pos) && ($pos!==false) )
-{
+if (isset($pos) && ($pos !== false)) {
     $debug_mode = true;
     array_splice($t_args,$pos,1);           // remove the arg and reorder
 } else $debug_mode = false;;
 
 $pos = array_search('--debug',$t_args);     // repeated --debug
-if (isset($pos) && ($pos!==false) )
-{
+if (isset($pos) && ($pos !== false)) {
     $debug_mode = 2;
     array_splice($t_args,$pos,1);           // remove the arg and reorder
 }
@@ -117,7 +112,6 @@ else
     $conf->validate();
     if ($force_conf_silent) $conf->silent = true;
 }
-//var_dump($conf);
 
 if (!$conf->silent) fprintf(STDERR,"Info:\tyakpro-po version = %s%s",$yakpro_po_version,PHP_EOL);
 

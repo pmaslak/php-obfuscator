@@ -39,24 +39,30 @@ class Scrambler
     private $silent                 = null;     // display or not Information level messages.
     private $label_counter          =    0;     // internal label counter.
 
-    private $t_reserved_variable_names = array( 'this','GLOBALS','_SERVER', '_GET', '_POST', '_FILES', '_COOKIE','_SESSION', '_ENV', '_REQUEST',
-                                                'php_errormsg','HTTP_RAW_POST_DATA','http_response_header','argc','argv'
-                                              );
-    private $t_reserved_function_names = array( '__halt_compiler','__autoload', 'abstract', 'and', 'array', 'as', 'bool', 'break', 'callable', 'case', 'catch',
-                                                'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else',
-                                                'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile',
-                                                'eval', 'exit', 'extends', 'false', 'final', 'finally', 'float', 'for', 'foreach', 'function', 'global', 'goto', 'if',
-                                                'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'int', 'interface', 'isset', 'list',
-                                                'namespace', 'new', 'null', 'or', 'print', 'private', 'protected', 'public', 'require', 'require_once',
-                                                'return', 'static', 'string', 'switch', 'throw', 'trait', 'true', 'try', 'unset', 'use', 'var', 'while', 'xor','yield',
-                                                'apache_request_headers'                        // seems that it is not included in get_defined_functions ..
-                                              );
+    private $t_reserved_variable_names = [
+        'this', 'GLOBALS', '_SERVER', '_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_ENV', '_REQUEST',
+        'php_errormsg', 'HTTP_RAW_POST_DATA', 'http_response_header', 'argc', 'argv'
+    ];
+    private $t_reserved_function_names = ['__halt_compiler', '__autoload', 'abstract', 'and', 'array', 'as', 'bool', 'break', 'callable', 'case', 'catch',
+        'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else',
+        'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile',
+        'eval', 'exit', 'extends', 'false', 'final', 'finally', 'float', 'for', 'foreach', 'function', 'global', 'goto', 'if',
+        'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'int', 'interface', 'isset', 'list',
+        'namespace', 'new', 'null', 'or', 'print', 'private', 'protected', 'public', 'require', 'require_once',
+        'return', 'static', 'string', 'switch', 'throw', 'trait', 'true', 'try', 'unset', 'use', 'var', 'while', 'xor', 'yield',
+        'apache_request_headers'                        // seems that it is not included in get_defined_functions ..
+    ];
 
-    private $t_reserved_class_names     = array('parent', 'self', 'static',                    // same reserved names for classes, interfaces  and traits...
-                                                'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void', 'iterable', 'object',  'resource', 'scalar', 'mixed', 'numeric'
-                                               );
+    // same reserved names for classes, interfaces  and traits...
+    private $t_reserved_class_names = [
+        'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
+        'iterable', 'object', 'resource', 'scalar', 'mixed', 'numeric'
+    ];
 
-    private $t_reserved_method_names    = array('__construct', '__destruct', '__call', '__callstatic', '__get', '__set', '__isset', '__unset', '__sleep', '__wakeup', '__tostring', '__invoke', '__set_state', '__clone','__debuginfo' );
+    private $t_reserved_method_names = [
+        '__construct', '__destruct', '__call', '__callstatic', '__get', '__set', '__isset', '__unset', '__sleep',
+        '__wakeup', '__tostring', '__invoke', '__set_state', '__clone', '__debuginfo'
+    ];
 
 
     function __construct($type,$conf,$target_directory)
@@ -68,7 +74,7 @@ class Scrambler
         $this->t_first_chars        = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $this->t_chars              = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
         $this->r                    = md5(microtime(true));     // random seed
-        $this->t_scramble           = array();
+        $this->t_scramble           = [];
         $this->silent               = $conf->silent;
         if (isset($conf->scramble_mode))
         {
@@ -95,8 +101,8 @@ class Scrambler
         $this->l2                   = strlen($this->t_chars      )-1;
         $this->scramble_length_min  = 2;
         $this->scramble_length      = 5;
-        if (isset($conf->scramble_length))
-        {
+
+        if (isset($conf->scramble_length)) {
             $conf->scramble_length += 0;
             if ( ($conf->scramble_length >= $this->scramble_length_min) && ($conf->scramble_length <= $this->scramble_length_max) )
             {
@@ -325,7 +331,7 @@ class Scrambler
         if (!$this->silent) fprintf(STDERR,"Info:\t[%-14s] scrambled \t: %8d%s",$this->scramble_type,count($this->t_scramble),PHP_EOL);
         if (isset($this->context_directory))                            // the destructor will save the current context
         {
-            $t      = array();
+            $t      = [];
             $t[0]   = self::SCRAMBLER_CONTEXT_VERSION;
             $t[1]   = $this->t_scramble;
             $t[2]   = $this->t_rscramble;
@@ -368,9 +374,8 @@ class Scrambler
         $r = $this->case_sensitive ? $s : strtolower($s);
         if ( array_key_exists($r,$this->t_ignore) ) return $s;
 
-        if (isset($this->t_ignore_prefix))
-        {
-            foreach($this->t_ignore_prefix as $key => $dummy) if (substr($r,0,strlen($key))===$key) return $s;
+        if (isset($this->t_ignore_prefix)) {
+            foreach ($this->t_ignore_prefix as $key => $dummy) if (substr($r, 0, strlen($key)) === $key) return $s;
         }
 
         if (!isset($this->t_scramble[$r]))      // if not already scrambled:
@@ -389,8 +394,8 @@ class Scrambler
                 $this->t_rscramble[$y] = $r;
                 break;
             }
-            if (!isset($this->t_scramble[$r]))
-            {
+
+            if (!isset($this->t_scramble[$r])) {
                 fprintf(STDERR,"Scramble Error: Identifier not found after 50 iterations!%sAborting...%s",PHP_EOL,PHP_EOL); // should statistically never occur!
                 exit;
             }
@@ -406,7 +411,7 @@ class Scrambler
     
     public function generate_label_name($prefix = "!label")
     {
-        return $prefix.($this->label_counter++);
+        return $prefix . ($this->label_counter++);
     }
 }
 

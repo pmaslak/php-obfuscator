@@ -13,15 +13,17 @@
 
 $t_pre_defined_classes          = array_flip(array_map('strtolower', get_declared_classes()));
 $t_pre_defined_interfaces       = array_flip(array_map('strtolower', get_declared_interfaces()));
-$t_pre_defined_traits           = function_exists('get_declared_traits') ? array_flip(array_map('strtolower', get_declared_traits())) : array(); 
+$t_pre_defined_traits           = function_exists('get_declared_traits') ? array_flip(array_map('strtolower', get_declared_traits())) : []; 
 $t_pre_defined_classes          = array_merge($t_pre_defined_classes,$t_pre_defined_interfaces,$t_pre_defined_traits);
 
-$t_pre_defined_class_methods    = array();  $t_pre_defined_class_methods_by_class       = array();
-$t_pre_defined_class_properties = array();  $t_pre_defined_class_properties_by_class    = array();
-$t_pre_defined_class_constants  = array();  $t_pre_defined_class_constants_by_class     = array();
+$t_pre_defined_class_methods = [];
+$t_pre_defined_class_methods_by_class = [];
+$t_pre_defined_class_properties = [];
+$t_pre_defined_class_properties_by_class = [];
+$t_pre_defined_class_constants = [];
+$t_pre_defined_class_constants_by_class = [];
 
-foreach($t_pre_defined_classes as $pre_defined_class_name => $dummy)
-{
+foreach ($t_pre_defined_classes as $pre_defined_class_name => $dummy) {
     $t = array_flip(array_map('strtolower', get_class_methods($pre_defined_class_name)));
     if (count($t)) $t_pre_defined_class_methods_by_class[$pre_defined_class_name] = $t;
     $t_pre_defined_class_methods = array_merge($t_pre_defined_class_methods, $t);

@@ -17,8 +17,7 @@ class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
     {
         $l = strlen($str);
         $result = '';
-        for($i=0;$i<$l;++$i)
-        {
+        for ($i = 0; $i < $l; ++$i) {
             $result .= mt_rand(0,1) ? "\x".dechex(ord($str{$i})) : "\\".decoct(ord($str{$i}));
         }
         return $result;
@@ -55,14 +54,10 @@ class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
         }
         */
         $result = '';
-        foreach ($node->parts as $element)
-        {
-            if ($element instanceof PhpParser\Node\Scalar\EncapsedStringPart)
-            {
-                $result .=  $this->obfuscate_string($element->value);
-            }
-            else
-            {
+        foreach ($node->parts as $element) {
+            if ($element instanceof PhpParser\Node\Scalar\EncapsedStringPart) {
+                $result .= $this->obfuscate_string($element->value);
+            } else {
                 $result .= '{' . $this->p($element) . '}';
             }
         }

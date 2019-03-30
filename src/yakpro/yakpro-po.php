@@ -11,7 +11,10 @@
 //          No warranty of any kind.
 //          Use and abuse at your own risks.
 //========================================================================
-if (isset($_SERVER["SERVER_SOFTWARE"]) && ($_SERVER["SERVER_SOFTWARE"]!="") ){ echo "<h1>Comand Line Interface Only!</h1>"; die; }
+if (isset($_SERVER["SERVER_SOFTWARE"]) && ($_SERVER["SERVER_SOFTWARE"]!="") ){
+    echo "<h1>Comand Line Interface Only!</h1>";
+    die;
+}
 
 
 const PHP_PARSER_DIRECTORY  = 'PHP-Parser';
@@ -19,7 +22,7 @@ require __DIR__ . '/../../../../../vendor/autoload.php';
 
 //require_once 'include/check_version.php';
 
-require_once 'include/get_default_defined_objects.php';     // include this file before defining something....
+require_once 'include/get_default_defined_objects.php';
 
 
 require_once 'include/classes/config.php';
@@ -47,27 +50,24 @@ use PhpParser\NodeTraverser;
 use PhpParser\PrettyPrinter;
 
 $parser_mode = ParserFactory::ONLY_PHP7;
-
 $parser = (new ParserFactory)->create($parser_mode);
 
-
-$traverser          = new NodeTraverser;
+$traverser = new NodeTraverser;
 
 if ($conf->obfuscate_string_literal)    $prettyPrinter      = new myPrettyprinter;
 else                                    $prettyPrinter      = new PrettyPrinter\Standard;
 
 $t_scrambler = [];
-foreach(array('variable','function','method','property','class','class_constant','constant','label') as $scramble_what)
+$parserElementTypes = ['variable','function','method','property','class','class_constant','constant','label'];
+foreach($parserElementTypes as $scramble_what)
 {
     $t_scrambler[$scramble_what] = new Scrambler($scramble_what, $conf, ($process_mode=='directory') ? $target_directory : null);
 }
-if ($whatis!=='')
-{
+
+if ($whatis!=='') {
     if ($whatis{0} == '$') $whatis = substr($whatis,1);
-    foreach(array('variable','function','method','property','class','class_constant','constant','label') as $scramble_what)
-    {
-        if ( ( $s = $t_scrambler[$scramble_what]-> unscramble($whatis)) !== '')
-        {
+    foreach($parserElementTypes as $scramble_what)  {
+        if ( ( $s = $t_scrambler[$scramble_what]->unscramble($whatis)) !== '') {
             switch($scramble_what)
             {
                 case 'variable':
