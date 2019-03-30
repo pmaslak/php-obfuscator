@@ -15,7 +15,7 @@ if (isset($_SERVER["SERVER_SOFTWARE"]) && ($_SERVER["SERVER_SOFTWARE"]!="") ){ e
 
 
 const PHP_PARSER_DIRECTORY  = 'PHP-Parser';
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../../../../vendor/autoload.php';
 
 //require_once 'include/check_version.php';
 
@@ -46,14 +46,6 @@ use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 use PhpParser\PrettyPrinter;
 
-//switch($conf->parser_mode)
-//{
-//    case 'PREFER_PHP7': $parser_mode = ParserFactory::PREFER_PHP7;  break;
-//    case 'PREFER_PHP5': $parser_mode = ParserFactory::PREFER_PHP5;  break;
-//    case 'ONLY_PHP7':   $parser_mode = ParserFactory::ONLY_PHP7;    break;
-//    case 'ONLY_PHP5':   $parser_mode = ParserFactory::ONLY_PHP5;    break;
-//    default:            $parser_mode = ParserFactory::PREFER_PHP5;  break;
-//}
 $parser_mode = ParserFactory::ONLY_PHP7;
 
 $parser = (new ParserFactory)->create($parser_mode);
@@ -64,7 +56,7 @@ $traverser          = new NodeTraverser;
 if ($conf->obfuscate_string_literal)    $prettyPrinter      = new myPrettyprinter;
 else                                    $prettyPrinter      = new PrettyPrinter\Standard;
 
-$t_scrambler = array();
+$t_scrambler = [];
 foreach(array('variable','function','method','property','class','class_constant','constant','label') as $scramble_what)
 {
     $t_scrambler[$scramble_what] = new Scrambler($scramble_what, $conf, ($process_mode=='directory') ? $target_directory : null);

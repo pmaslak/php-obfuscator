@@ -7,7 +7,9 @@ under PHP library available from composer.
 
 ## Example usage
 ```php
-$obfuscator = new pmaslak\Obfuscator([
+use pmaslak\PhpObfuscator\Obfuscator;
+
+$obfuscator = new Obfuscator([
     'allowed_mime_types' => ['text/x-php'],
     'obfuscation_options' => ['no-obfuscate-variable-name', 'no-obfuscate-method-name', 'no-obfuscate-class-name', 'no-obfuscate-property-name']
 ]);
