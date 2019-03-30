@@ -1,8 +1,9 @@
 {
     "name": "pmaslak/php-obfuscator",
     "description": "PHP obfuscator",
-    "type": "project",
+    "type": "package",
     "keywords": [
+        "php",
         "obfuscator"
     ],
     "homepage": "http://maslak.it",
@@ -23,7 +24,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Pmaslak\\PhpObfuscator\\": "src/"
+            "pmaslak\\PhpObfuscator\\": "src/"
         }
     }
 }

@@ -4,7 +4,7 @@
  * @author Pawel Maslak <pawel@maslak.it>
  */
 
-namespace Pmaslak\PhpObfuscator;
+namespace pmaslak\PhpObfuscator;
 
 
 class Configuration
