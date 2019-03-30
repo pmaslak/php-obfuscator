@@ -5,7 +5,7 @@ declare(strict_types=1);
  * @author Pawel Maslak <pawel@maslak.it>
  */
 
-namespace pmaslak;
+namespace Pmaslak\PhpObfuscator;
 
 
 interface ObfuscatorInterface

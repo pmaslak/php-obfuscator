@@ -23,7 +23,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Skeleton\\": "src/"
+            "Pmaslak\\PhpObfuscator\\": "src/"
         }
     }
 }

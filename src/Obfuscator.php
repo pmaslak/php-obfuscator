@@ -4,7 +4,7 @@
  * @author Pawel Maslak <pawel@maslak.it>
  */
 
-namespace pmaslak;
+namespace Pmaslak\PhpObfuscator;
 
 
 class Obfuscator implements ObfuscatorInterface
