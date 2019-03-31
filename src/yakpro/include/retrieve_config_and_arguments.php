@@ -49,12 +49,6 @@ if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
     array_splice($t_args,$pos,2);           // remove the 2 args and reorder
 } else $target = '';
 
-$pos = array_search('--clean',$t_args);
-if (isset($pos) && ($pos !== false)) {
-    $clean_mode = true;
-    array_splice($t_args,$pos,1);           // remove the arg and reorder
-} else $clean_mode = false;
-
 $pos = array_search('--silent',$t_args);
 if (isset($pos) && ($pos !== false)) {
     $force_conf_silent = true;

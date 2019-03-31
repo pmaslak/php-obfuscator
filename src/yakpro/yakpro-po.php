@@ -25,14 +25,6 @@ include      'include/retrieve_config_and_arguments.php';
 require_once 'include/classes/parser_extensions/my_pretty_printer.php';
 require_once 'include/classes/parser_extensions/my_node_visitor.php';
 
-
-if ($clean_mode && file_exists("$target_directory/yakpro-po/.yakpro-po-directory") )
-{
-    if (!$conf->silent) fprintf(STDERR,"Info:\tRemoving directory\t= [%s]%s","$target_directory/yakpro-po",PHP_EOL);
-    remove_directory("$target_directory/yakpro-po");
-    exit;
-}
-
 $parser = (new ParserFactory)->create(ParserFactory::ONLY_PHP7);
 $traverser = new NodeTraverser;
 
