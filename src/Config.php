@@ -10,7 +10,10 @@ namespace pmaslak\PhpObfuscator;
 class Config
 {
     private static $obfuscator_version = '1.0.4';
-    private static $yak_version = '1.0.4';//just denture for now
+    private static $yak_version = '2.0.4';//just denture for now
+    private static $debug = false;
+    private static $obfuscationOptions = [];
+    private static $allowedMimeTypes = ['text/x-php'];
 
     public $t_ignore_pre_defined_classes    = 'all';        // 'all' (default value) , 'none',  or array of pre-defined classes that you use in your software:
     //      ex: array('Exception', 'PDO', 'PDOStatement', 'PDOException');
@@ -148,6 +151,41 @@ class Config
     public static function getYakVersion(): string
     {
         return self::$yak_version;
+    }
+
+    public static function isDebug(): bool
+    {
+        return self::$debug;
+    }
+
+    public static function enableDebug(): void
+    {
+        self::$debug = true;
+    }
+
+    public static function disableDebug(): void
+    {
+        self::$debug = false;
+    }
+
+    public static function getAllowedMimeTypes(): array
+    {
+        return self::$allowedMimeTypes;
+    }
+
+    public static function getObfuscationOptions(): array
+    {
+        return self::$obfuscationOptions;
+    }
+
+    public static function setObfuscationOptions(array $options): void
+    {
+        self::$obfuscationOptions = $options;
+    }
+
+    public static function setAllowedMimeTypes(array $types): void
+    {
+        self::$allowedMimeTypes = $types;
     }
 
     public static function getAvailableOptions(): array

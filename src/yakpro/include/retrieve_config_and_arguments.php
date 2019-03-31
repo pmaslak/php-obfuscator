@@ -20,21 +20,6 @@ $process_mode           = '';   // can be: 'file' or 'directory'
 
 $pos = array_search('-h',$t_args); if (!isset($pos) || ($pos===false)) $pos = array_search('--help',$t_args);
 
-if (isset($pos) && ($pos !== false)) {
-    fprintf(STDERR,"Info:\tyakpro-po version = %s%s", pmaslak\PhpObfuscator\Config::getYakVersion() ,PHP_EOL.PHP_EOL);
-    $lang = '';
-    if (($x = getenv('LANG'))!==false) $s = strtolower($x); $x = explode('_',$x); $x = $x[0];
-         if (file_exists("$yakpro_po_dirname/locale/$x/README.md"))  $help = file_get_contents("$yakpro_po_dirname/locale/$x/README.md");
-    else if (file_exists("$yakpro_po_dirname/README.md"))            $help = file_get_contents("$yakpro_po_dirname/README.md");
-    else $help = "Help File not found!";
-
-    $pos    = stripos($help,'####');    if ($pos!==false) $help = substr($help,$pos+strlen('####'));
-    $pos    = stripos($help,'####');    if ($pos!==false) $help = substr($help,0,$pos);
-    $help   = trim(str_replace(array('## ','`'),array('',''),$help));
-    echo "$help".PHP_EOL;
-    exit;
-}
-
 $pos = array_search('--config-file',$t_args);
 
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
@@ -66,7 +51,7 @@ $pos = array_search('--debug',$t_args);
 if (isset($pos) && ($pos !== false)) {
     $debug_mode = true;
     array_splice($t_args,$pos,1);           // remove the arg and reorder
-} else $debug_mode = false;;
+} else $debug_mode = false;
 
 $pos = array_search('--debug',$t_args);     // repeated --debug
 if (isset($pos) && ($pos !== false)) {
@@ -99,9 +84,7 @@ foreach($t_where As $dummy => $where) if (check_config_file($where)) { $config_f
 
 $conf = new \pmaslak\PhpObfuscator\Config();
 
-if ($force_conf_silent) {
-    $conf->silent = true;
-}
+$conf->silent = true;
 
 if ($config_filename == '') {
     fprintf(STDERR, "Warning:No config file found... using default values!%s", PHP_EOL);
@@ -194,14 +177,10 @@ switch(count($t_args))
 {
     case 0:
         if (isset($conf->source_directory) && isset($conf->target_directory)) {
-            $process_mode       = 'directory';
-            $source_directory   = $conf->source_directory;
-            $target_directory   = $conf->target_directory;
-            create_context_directories($target_directory);
+            throw new \Exception('Trying to obfuscate all directory instead of use single file');
             break;
         }
 
-        fprintf(STDERR,"Error:\tsource_directory and target_directory not specified!%s\tneither within command line parameter,%s\tnor in config file!%s",PHP_EOL,PHP_EOL,PHP_EOL);
         exit(-1);
     case 1:
         $source_file = realpath($t_args[0]);
@@ -221,8 +200,8 @@ switch(count($t_args))
                     if (is_readable($x) && is_writable($x) && is_file($x) && (file_get_contents($x) !== '')) {
                         $fp = fopen($target_file,"r");
                         $y = fgets($fp);
-                        $y = fgets($fp).fgets($fp).fgets($fp).fgets($fp).fgets($fp);
-                        if (strpos($y,'    |  Obfuscated by YAK Pro - Php Obfuscator ')===false)       // comment is a magic string, used to not overwrite wrong files!!!
+                        $y = fgets($fp) . fgets($fp) . fgets($fp) . fgets($fp) . fgets($fp);
+                        if (strpos($y,'    |  Obfuscated by ') === false)       // comment is a magic string, used to not overwrite wrong files!!!
                         {
                             $x = realpath($target_file);
                             fprintf(STDERR,"Error:\tTarget file [%s] exists and is not an obfuscated file!%s", ($x!==false) ? $x : $target_file,PHP_EOL);
@@ -248,29 +227,11 @@ switch(count($t_args))
                 break;
             }
         }
-        fprintf(STDERR,"Error:\tSource file [%s] is not readable!%s",($source_file!==false) ? $source_file : $t_args[0],PHP_EOL);
+        throw new \Exception('Error: Source file ' . $source_file . ' is not readable');
         exit(-1);
     default:
-        fprintf(STDERR,"Error:\tToo much parameters are specified, I do not know how to deal with that!!!%s",PHP_EOL);
+        throw new \Exception('Error: Too much parameters are specified, I do not know how to deal with that!');
         exit(-1);
 }
-
-if (!$conf->silent) {
-    fprintf(STDERR, "Info:\tProcess Mode\t\t= %s%s", $process_mode, PHP_EOL);
-}
-
-
-switch($process_mode)
-{
-    case 'file':
-        if (!$conf->silent) fprintf(STDERR,"Info:\tsource_file\t\t= [%s]%s",$source_file,PHP_EOL);
-        if (!$conf->silent) fprintf(STDERR,"Info:\ttarget_file\t\t= [%s]%s",($target_file!=='') ? $target_file : 'stdout',PHP_EOL);
-        break;
-    case 'directory':
-        if (!$conf->silent) fprintf(STDERR,"Info:\tsource_directory\t= [%s]%s",$source_directory,PHP_EOL);
-        if (!$conf->silent) fprintf(STDERR,"Info:\ttarget_directory\t= [%s]%s",$target_directory,PHP_EOL);
-        break;
-}
-
 
 ?>

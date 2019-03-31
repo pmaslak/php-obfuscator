@@ -25,32 +25,14 @@ class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
 
     public function pScalar_String(PhpParser\Node\Scalar\String_ $node)
     {
-        $result = $this->obfuscate_string($node->value);            if (!strlen($result)) return "''";
+        $result = $this->obfuscate_string($node->value);
+        if (!strlen($result)) return "''";
         return  '"'.$this->obfuscate_string($node->value).'"';
     }
 
     //TODO: pseudo-obfuscate HEREDOC string
     public function pScalar_Encapsed(PhpParser\Node\Scalar\Encapsed $node)
     {
-        /*
-        if ($node->getAttribute('kind') === PhpParser\Node\Scalar\String_::KIND_HEREDOC) 
-        {
-            $label = $node->getAttribute('docLabel');
-            if ($label && !$this->encapsedContainsEndLabel($node->parts, $label)) 
-            {
-                if (count($node->parts) === 1
-                    && $node->parts[0] instanceof PhpParser\Node\Scalar\EncapsedStringPart
-                    && $node->parts[0]->value === ''
-                )
-                {
-                    return "<<<$label\n$label" . $this->docStringEndToken;
-                }
-
-                return "<<<$label\n" . $this->pEncapsList($node->parts, null) . "\n$label"
-                     . $this->docStringEndToken;
-            }
-        }
-        */
         $result = '';
         foreach ($node->parts as $element) {
             if ($element instanceof PhpParser\Node\Scalar\EncapsedStringPart) {
@@ -59,7 +41,7 @@ class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
                 $result .= '{' . $this->p($element) . '}';
             }
         }
-        return '"'.$result.'"';
+        return '"' . $result . '"';
     }
 }
 

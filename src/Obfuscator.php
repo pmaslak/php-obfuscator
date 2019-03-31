@@ -13,11 +13,6 @@ class Obfuscator implements ObfuscatorInterface
 
     public $processedFiles = 0;
     public $lastProcessTime = 0;
-    private $configuration = [
-        'debug' => false,
-        'allowed_mime_types' => ['text/x-php'],
-        'obfuscation_options' => []
-    ];
 
     function __construct(array $config)
     {
@@ -56,11 +51,11 @@ class Obfuscator implements ObfuscatorInterface
     private function injectConfiguration(array $config): void
     {
         if (isset($config['debug']) && $config['debug']) {
-            $this->configuration['debug'] = true;
+            Config::enableDebug();
         }
 
         if (isset($config['obfuscation_options'])) {
-            $this->configuration['obfuscation_options'] = Config::getFilteredOptions($config['obfuscation_options']);
+            Config::setObfuscationOptions(Config::getFilteredOptions($config['obfuscation_options']));
         }
     }
 
@@ -137,7 +132,7 @@ class Obfuscator implements ObfuscatorInterface
                 $fileName = $fileInfo->getFilename();
                 $mimetype = mime_content_type($directory . DIRECTORY_SEPARATOR . $fileName);
 
-                if (in_array($mimetype, $this->configuration['allowed_mime_types'])) {
+                if (in_array($mimetype, Config::getAllowedMimeTypes())) {
                     $this->processFile($directory . $fileName, $target . $fileName);
                 }
             }
@@ -151,7 +146,7 @@ class Obfuscator implements ObfuscatorInterface
      */
     private function processFile($source, $target)
     {
-        $parameters = $this->configuration['obfuscation_options'];
+        $parameters = Config::getObfuscationOptions();
         $parameters = array_map('trim', $parameters);
 
         if (empty($parameters)) {
@@ -160,7 +155,7 @@ class Obfuscator implements ObfuscatorInterface
             $parameters = '--' . implode(' --', $parameters);
         }
 
-        if ($this->configuration['debug']) {
+        if (Config::isDebug()) {
             $parameters = ' --debug ' . $parameters;
         } else {
             $parameters = ' --silent ' . $parameters;
@@ -177,7 +172,7 @@ class Obfuscator implements ObfuscatorInterface
 
     private function getBaseCommand(): string
     {
-        return 'php ' . $this->directory . '/src/yakpro/yakpro-po.php ';
+        return 'php ' . $this->directory . '/src/yakpro/obfuscator_command.php ';
     }
 }
 

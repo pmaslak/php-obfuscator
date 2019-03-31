@@ -11,12 +11,16 @@
 //          Use and abuse at your own risks.
 //========================================================================
 
-function obfuscate($filename)                   // takes a file_path as input, returns the corresponding obfuscated code as a string
+use PhpParser\ParserFactory;
+
+function obfuscate($filename)
 {
     global $conf;
-    global $parser,$traverser,$prettyPrinter;
-    global $debug_mode;
-    
+    global $traverser, $prettyPrinter;
+
+
+    $parser = (new ParserFactory)->create(ParserFactory::ONLY_PHP7);
+
     $src_filename = $filename;
     $tmp_filename = $first_line = '';
     $t_source = file($filename);
@@ -38,27 +42,29 @@ function obfuscate($filename)                   // takes a file_path as input, r
         }
 
         try {
-            $stmts  = $parser->parse($source);  // PHP-Parser returns the syntax tree
+            // PHP-Parser returns the syntax tree
+            $stmts = $parser->parse($source);
         }
-        catch (PhpParser\Error $e)                              // if an error occurs, then redo it without php_strip_whitespace, in order to display the right line number with error!
-        {
+        // if an error occurs, then redo it without php_strip_whitespace, in order to display the right line number with error!
+        catch (PhpParser\Error $e) {
             $source = file_get_contents($filename);
             $stmts  = $parser->parse($source);
         }
-        if ($debug_mode===2)                                    //  == 2 is true when debug_mode is true!
-        {
+
+        if ($conf::isDebug()) {
             $source = file_get_contents($filename);
-            $stmts  = $parser->parse($source);
-        }
-        if ($debug_mode) {
+            $stmts = $parser->parse($source);
             var_dump($stmts);
         }
 
-        $stmts  = $traverser->traverse($stmts);                 //  Use PHP-Parser function to traverse the syntax tree and obfuscate names
-        if ($conf->shuffle_stmts && (count($stmts)>2) )
+        //Use PHP-Parser function to traverse the syntax tree and obfuscate names
+        $stmts  = $traverser->traverse($stmts);
+
+        if ($conf->shuffle_stmts && (count($stmts) > 2))
         {
             $last_inst  = array_pop($stmts);
             $last_use_stmt_pos = -1;
+
             foreach($stmts as $i => $stmt)                      // if a use statement exists, do not shuffle before the last use statement
             {                                                   //TODO: enhancement: keep all use statements at their position, and shuffle all sub-parts
                 if ( $stmt instanceof PhpParser\Node\Stmt\Use_ ) $last_use_stmt_pos = $i;
@@ -70,33 +76,35 @@ function obfuscate($filename)                   // takes a file_path as input, r
             $stmts      = array_merge($stmts,shuffle_statements($stmts_to_shuffle));
             $stmts[]    = $last_inst;
         }
-        // if ($debug_mode) var_dump($stmts);
 
-        
-        $code   = trim($prettyPrinter->prettyPrintFile($stmts));            //  Use PHP-Parser function to output the obfuscated source, taking the modified obfuscated syntax tree as input
+        //Use PHP-Parser function to output the obfuscated source, taking the modified obfuscated syntax tree as input
+        $code = trim($prettyPrinter->prettyPrintFile($stmts));
 
-        if (isset($conf->strip_indentation) && $conf->strip_indentation)
-        {
+        if (isset($conf->strip_indentation) && $conf->strip_indentation) {
             $code = remove_whitespaces($code);
         }
+
         $endcode = substr($code,6);
 
-        $code  = '<?php'.PHP_EOL;
-//        $code .= $conf->get_comment();                                          // comment obfuscated source
+        $code  = '<?php' . PHP_EOL;
+         // comment obfuscated source
+//        $code .= $conf->get_comment();
         if (isset($conf->extract_comment_from_line) && isset($conf->extract_comment_to_line)) {
             $t_source = file($filename);
             for ($i = $conf->extract_comment_from_line - 1; $i < $conf->extract_comment_to_line; ++$i) $code .= $t_source[$i];
         }
+
         if (isset($conf->user_comment)) {
             $code .= '/*' . PHP_EOL . $conf->user_comment . PHP_EOL . '*/' . PHP_EOL;
         }
+
         $code .= $endcode;
 
         if (($tmp_filename != '') && ($first_line != '')) {
             $code = $first_line . $code;
             unlink($tmp_filename);
         }
-        
+
         return trim($code);
     }
     catch (Exception $e)
@@ -160,22 +168,6 @@ function create_context_directories($target_directory)
     }
     $target_directory = realpath($target_directory);
     if (!file_exists("$target_directory/yakpro-po/.yakpro-po-directory")) touch("$target_directory/yakpro-po/.yakpro-po-directory");
-}
-
-function remove_directory($path)
-{
-    if ($dp = opendir($path)) {
-        while (($entry = readdir($dp)) !== false) {
-            if ($entry ==  ".") continue;
-            if ($entry == "..") continue;
-
-                 if (is_link("$path/$entry"))   unlink("$path/$entry" );            // remove symbolic links first, to not dereference...
-            else if (is_dir ("$path/$entry"))   remove_directory("$path/$entry");
-            else                                unlink("$path/$entry" );
-        }
-        closedir($dp);
-        rmdir($path);
-    }
 }
 
 function confirm($str)
