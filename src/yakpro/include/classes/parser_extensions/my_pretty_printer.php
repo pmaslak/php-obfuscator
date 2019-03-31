@@ -23,13 +23,11 @@ class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
         return $result;
     }
 
-
     public function pScalar_String(PhpParser\Node\Scalar\String_ $node)
     {
         $result = $this->obfuscate_string($node->value);            if (!strlen($result)) return "''";
         return  '"'.$this->obfuscate_string($node->value).'"';
     }
-
 
     //TODO: pseudo-obfuscate HEREDOC string
     public function pScalar_Encapsed(PhpParser\Node\Scalar\Encapsed $node)

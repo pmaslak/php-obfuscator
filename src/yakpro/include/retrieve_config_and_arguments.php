@@ -21,7 +21,7 @@ $process_mode           = '';   // can be: 'file' or 'directory'
 $pos = array_search('-h',$t_args); if (!isset($pos) || ($pos===false)) $pos = array_search('--help',$t_args);
 
 if (isset($pos) && ($pos !== false)) {
-    fprintf(STDERR,"Info:\tyakpro-po version = %s%s",$yakpro_po_version,PHP_EOL.PHP_EOL);
+    fprintf(STDERR,"Info:\tyakpro-po version = %s%s", pmaslak\PhpObfuscator\Config::getYakVersion() ,PHP_EOL.PHP_EOL);
     $lang = '';
     if (($x = getenv('LANG'))!==false) $s = strtolower($x); $x = explode('_',$x); $x = $x[0];
          if (file_exists("$yakpro_po_dirname/locale/$x/README.md"))  $help = file_get_contents("$yakpro_po_dirname/locale/$x/README.md");
@@ -84,9 +84,13 @@ if (isset($pos) && ($pos !== false)) {
 // $t_args now containes remaining parameters.
 // We will first look for config file, and then we will analyze $t_args accordingly
 
-$config_file_namepart = 'yakpro-po.cnf';    if (($x = getenv('YAKPRO_PO_CONFIG_FILENAME'))!==false) $config_file_namepart = $x;
+$config_file_namepart = 'yakpro-po.cnf';
+if (($x = getenv('YAKPRO_PO_CONFIG_FILENAME')) !== false) {
+    $config_file_namepart = $x;
+}
 
-                                                            $t_where    = array();
+$t_where = [];
+
 if ($argument_config_filename!='')                          $t_where[]  = $argument_config_filename;                        // --config-file argument
 if (($x = getenv('YAKPRO_PO_CONFIG_FILE'))     !==false)    $t_where[]  = $x;                                               // YAKPRO_PO_CONFIG_FILE
 if (($x = getenv('YAKPRO_PO_CONFIG_DIRECTORY'))!==false)    $t_where[]  = "$x/$config_file_namepart";                       // YAKPRO_PO_CONFIG_DIRECTORY
@@ -99,26 +103,27 @@ if ( $x                  !==false)                          $t_where[]  = "$x/co
 
 foreach($t_where As $dummy => $where) if (check_config_file($where)) { $config_filename = $where; break; }
 
-$conf = new Config;
+$conf = new \pmaslak\PhpObfuscator\Config();
 
-if ($force_conf_silent)     $conf->silent = true;
+if ($force_conf_silent) {
+    $conf->silent = true;
+}
 
-if ($config_filename=='')   fprintf(STDERR,"Warning:No config file found... using default values!%s",PHP_EOL);
-else
-{
+if ($config_filename == '') {
+    fprintf(STDERR, "Warning:No config file found... using default values!%s", PHP_EOL);
+} else {
     $config_filename = realpath($config_filename);
-    if (!$conf->silent) fprintf(STDERR,"Info:\tUsing [%s] Config File...%s",$config_filename,PHP_EOL);
+    if (!$conf->silent) fprintf(STDERR, "Info:\tUsing [%s] Config File...%s", $config_filename, PHP_EOL);
     require_once $config_filename;
     $conf->validate();
     if ($force_conf_silent) $conf->silent = true;
 }
 
-if (!$conf->silent) fprintf(STDERR,"Info:\tyakpro-po version = %s%s",$yakpro_po_version,PHP_EOL);
+if (!$conf->silent) fprintf(STDERR,"Info:\tyakpro-po version = %s%s", pmaslak\PhpObfuscator\Config::getYakVersion(),PHP_EOL);
 
 
 $pos = array_search('-y',$t_args);
-if (isset($pos) && ($pos!==false) )
-{
+if (isset($pos) && ($pos !== false)) {
     $conf->confirm = false;
     array_splice($t_args,$pos,1);           // remove the arg and reorder
 }
@@ -177,15 +182,15 @@ $pos = array_search('--obfuscate-label-name',$t_args);              if (isset($p
 
 
 $pos = array_search('--scramble-mode',$t_args);
-if ( isset($pos) && ($pos!==false) && isset($t_args[$pos+1]) )
-{
+
+if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
     $conf->scramble_mode = $t_args[$pos+1];
     array_splice($t_args,$pos,2);           // remove the 2 args and reorder
 }
 
 $pos = array_search('--scramble-length',$t_args);
-if ( isset($pos) && ($pos!==false) && isset($t_args[$pos+1]) )
-{
+
+if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
     $conf->scramble_length = $t_args[$pos+1]+0;
     array_splice($t_args,$pos,2);           // remove the 2 args and reorder
 }
@@ -194,34 +199,32 @@ if ( isset($pos) && ($pos!==false) && isset($t_args[$pos+1]) )
 switch(count($t_args))
 {
     case 0:
-        if (isset($conf->source_directory) && isset($conf->target_directory))
-        {
+        if (isset($conf->source_directory) && isset($conf->target_directory)) {
             $process_mode       = 'directory';
             $source_directory   = $conf->source_directory;
             $target_directory   = $conf->target_directory;
             create_context_directories($target_directory);
             break;
         }
+
         fprintf(STDERR,"Error:\tsource_directory and target_directory not specified!%s\tneither within command line parameter,%s\tnor in config file!%s",PHP_EOL,PHP_EOL,PHP_EOL);
         exit(-1);
     case 1:
         $source_file = realpath($t_args[0]);
-        if (($source_file!==false) && file_exists($source_file))
-        {
-            if (is_file($source_file) && is_readable($source_file))
-            {
+        if (($source_file !== false) && file_exists($source_file)) {
+            if (is_file($source_file) && is_readable($source_file)) {
                 $process_mode   = 'file';
                 $target_file    = $target;
-                if ( ($target_file!=='') && file_exists($target_file) )
-                {
+
+                if (($target_file !== '') && file_exists($target_file)) {
                     $x = realpath($target_file);
-                    if (is_dir($x))
-                    {
+
+                    if (is_dir($x)) {
                         fprintf(STDERR,"Error:\tTarget file [%s] is a directory!%s", ($x!==false) ? $x : $target_file,PHP_EOL);
                         exit(-1);
                     }
-                    if ( is_readable($x) && is_writable($x) && is_file($x) && (file_get_contents($x)!=='') )
-                    {
+
+                    if (is_readable($x) && is_writable($x) && is_file($x) && (file_get_contents($x) !== '')) {
                         $fp = fopen($target_file,"r");
                         $y = fgets($fp);
                         $y = fgets($fp).fgets($fp).fgets($fp).fgets($fp).fgets($fp);
@@ -236,14 +239,14 @@ switch(count($t_args))
                 }
                 break;
             }
-            if (is_dir($source_file))
-            {
+
+            if (is_dir($source_file)) {
                 $process_mode       = 'directory';
                 $source_directory   = $source_file;
                 $target_directory   = $target;
                 if (($target_directory=='') && isset($conf->target_directory)) $target_directory = $conf->target_directory;
-                if ( $target_directory=='')
-                {
+
+                if ($target_directory == '') {
                     fprintf(STDERR,"Error:\tTarget directory is not specified!%s",PHP_EOL);
                     exit(-1);
                 }
@@ -258,7 +261,11 @@ switch(count($t_args))
         exit(-1);
 }
 
-if (!$conf->silent) fprintf(STDERR,"Info:\tProcess Mode\t\t= %s%s",$process_mode,PHP_EOL);
+if (!$conf->silent) {
+    fprintf(STDERR, "Info:\tProcess Mode\t\t= %s%s", $process_mode, PHP_EOL);
+}
+
+
 switch($process_mode)
 {
     case 'file':

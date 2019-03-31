@@ -20,6 +20,7 @@ function obfuscate($filename)                   // takes a file_path as input, r
     $src_filename = $filename;
     $tmp_filename = $first_line = '';
     $t_source = file($filename);
+
     if (substr($t_source[0], 0, 2) == '#!') {
         $first_line = array_shift($t_source);
         $tmp_filename = tempnam(sys_get_temp_dir(), 'po-');
@@ -74,7 +75,7 @@ function obfuscate($filename)                   // takes a file_path as input, r
         
         $code   = trim($prettyPrinter->prettyPrintFile($stmts));            //  Use PHP-Parser function to output the obfuscated source, taking the modified obfuscated syntax tree as input
 
-        if (isset($conf->strip_indentation) && $conf->strip_indentation)    // self-explanatory
+        if (isset($conf->strip_indentation) && $conf->strip_indentation)
         {
             $code = remove_whitespaces($code);
         }
@@ -105,14 +106,18 @@ function obfuscate($filename)                   // takes a file_path as input, r
     }
 }
 
-function check_preload_file($filename)                       // self-explanatory
+function check_preload_file($filename)
 {
     for ($ok = false; ;) {
-        if (!file_exists($filename)) return false;
+        if (!file_exists($filename)) {
+            return false;
+        }
+
         if (!is_readable($filename)) {
             fprintf(STDERR, "Warning:[%s] is not readable!%s", $filename, PHP_EOL);
             return false;
         }
+
         $fp     = fopen($filename,"r"); if($fp===false) break;
         $line   = trim(fgets($fp));     if ($line!='<?php')                                     { fclose($fp); break; }
         $line   = trim(fgets($fp));     if ($line!='// YAK Pro - Php Obfuscator: Preload File') { fclose($fp); break; }
@@ -124,7 +129,7 @@ function check_preload_file($filename)                       // self-explanatory
     return $ok;
 }
 
-function check_config_file($filename)                       // self-explanatory
+function check_config_file($filename)
 {
     for ($ok = false; ;) {
         if (!file_exists($filename)) return false;
@@ -143,7 +148,7 @@ function check_config_file($filename)                       // self-explanatory
     return $ok;
 }
 
-function create_context_directories($target_directory)      // self-explanatory
+function create_context_directories($target_directory)
 {
     foreach (array("$target_directory/yakpro-po", "$target_directory/yakpro-po/obfuscated", "$target_directory/yakpro-po/context") as $dummy => $dir) {
         if (!file_exists($dir)) mkdir($dir,0777,true);
@@ -157,8 +162,7 @@ function create_context_directories($target_directory)      // self-explanatory
     if (!file_exists("$target_directory/yakpro-po/.yakpro-po-directory")) touch("$target_directory/yakpro-po/.yakpro-po-directory");
 }
 
-
-function remove_directory($path)                            // self-explanatory
+function remove_directory($path)
 {
     if ($dp = opendir($path)) {
         while (($entry = readdir($dp)) !== false) {
@@ -174,7 +178,7 @@ function remove_directory($path)                            // self-explanatory
     }
 }
 
-function confirm($str)                                  // self-explanatory not yet used ... rfu
+function confirm($str)
 {
     global $conf;
     if (!$conf->confirm) {
@@ -187,102 +191,6 @@ function confirm($str)                                  // self-explanatory not 
         if ($r=='y')    return true;
         if ($r=='n')    return false;
     }
-}
-
-function obfuscate_directory($source_dir,$target_dir,$keep_mode=false)   // self-explanatory recursive obfuscation
-{
-    global $conf;
-
-    if (!$dp = opendir($source_dir)) {
-        fprintf(STDERR,"Error:\t [%s] directory does not exists!%s",$source_dir,PHP_EOL);
-        exit(-1);
-    }
-    $t_dir = [];
-    $t_file = [];
-
-    while (($entry = readdir($dp)) !== false) {
-        if ($entry == "." || $entry == "..")    continue;
-
-        $new_keep_mode = $keep_mode;
-
-        $source_path = "$source_dir/$entry";    $source_stat = @lstat($source_path);
-        $target_path = "$target_dir/$entry";    $target_stat = @lstat($target_path);
-        if ($source_stat === false) {
-            fprintf(STDERR,"Error:\t cannot stat [%s] !%s",$source_path,PHP_EOL);
-            exit(-1);
-        }
-
-        if (isset($conf->t_skip) && is_array($conf->t_skip) && in_array($source_path,$conf->t_skip))    continue;
-
-        if (is_link($source_path)) {
-            if ( ($target_stat!==false) && is_link($target_path) && ($source_stat['mtime']<=$target_stat['mtime']) )    continue;
-            if (  $target_stat!==false  )
-            {
-                if (is_dir($target_path))   remove_directory($target_path);
-                else
-                {
-                    if (unlink($target_path)===false)
-                    {
-                        fprintf(STDERR,"Error:\t cannot unlink [%s] !%s",$target_path,PHP_EOL);
-                        exit(-1);
-                    }
-                }
-            }
-            @symlink(readlink($source_path), $target_path);     // Do not warn on non existing symbolinc link target!
-            if (strtolower(PHP_OS)=='linux')    $x = `touch '$target_path' --no-dereference --reference='$source_path' `;
-            continue;
-        }
-
-        if (is_dir($source_path)) {
-            if ($target_stat !== false) {
-                if (!is_dir($target_path)) {
-                    if (unlink($target_path) === false) {
-                        fprintf(STDERR,"Error:\t cannot unlink [%s] !%s",$target_path,PHP_EOL);
-                        exit(-1);
-                    }
-                }
-            }
-            if (!file_exists($target_path)) mkdir($target_path,0777, true);
-            if (isset($conf->t_keep) && is_array($conf->t_keep) && in_array($source_path,$conf->t_keep))    $new_keep_mode = true;
-            obfuscate_directory($source_path,$target_path,$new_keep_mode);
-            continue;
-        }
-        if(is_file($source_path))
-        {
-            if ( ($target_stat!==false) && is_dir($target_path) )                               remove_directory($target_path);
-            if ( ($target_stat!==false) && ($source_stat['mtime']<=$target_stat['mtime']) )     continue;                       // do not process if source timestamp is not greater than target
-
-            $extension  = pathinfo($source_path,PATHINFO_EXTENSION);
-
-            $keep = $keep_mode;
-            if (isset($conf->t_keep) && is_array($conf->t_keep) && in_array($source_path,$conf->t_keep))    $keep = true;
-            if (!in_array($extension,$conf->t_obfuscate_php_extension) )                                    $keep = true;
-
-            if ($keep)
-            {
-                file_put_contents($target_path,file_get_contents($source_path));
-            }
-            else
-            {
-                $obfuscated_str =  obfuscate($source_path);
-                if ($obfuscated_str===null)
-                {
-                    if (isset($conf->abort_on_error))
-                    {
-                        fprintf(STDERR, "Aborting...%s",PHP_EOL);
-                        exit;
-                    }
-                }
-                file_put_contents($target_path,$obfuscated_str.PHP_EOL);
-            }
-            touch($target_path,$source_stat['mtime']);
-            chmod($target_path,$source_stat['mode']);
-            chgrp($target_path,$source_stat['gid']);
-            chown($target_path,$source_stat['uid']);
-            continue;
-        }
-    }
-    closedir($dp);
 }
 
 function shuffle_get_chunk_size(&$stmts)
@@ -310,40 +218,47 @@ function shuffle_statements($stmts)
     global $conf;
     global $t_scrambler;
 
-    if (!$conf->shuffle_stmts)          return $stmts;
-    
+    if (!$conf->shuffle_stmts) {
+        return $stmts;
+    }
+
     $chunk_size = shuffle_get_chunk_size($stmts);
-    if ($chunk_size<=0)                 return $stmts; // should never occur!
-    
+    if ($chunk_size <= 0) {
+        return $stmts; // should never occur!
+    }
+
     $n = count($stmts);
-    if ($n<(2*$chunk_size))             return $stmts;
-    
-    $scrambler              = $t_scrambler['label'];
-    $label_name_prev        = $scrambler->scramble($scrambler->generate_label_name());
-    $first_goto             = new PhpParser\Node\Stmt\Goto_($label_name_prev);
-    $t                      = array();
-    $t_chunk                = array();
+    if ($n < (2 * $chunk_size)) {
+        return $stmts;
+    }
+
+    $scrambler = $t_scrambler['label'];
+    $label_name_prev = $scrambler->scramble($scrambler->generate_label_name());
+    $first_goto = new PhpParser\Node\Stmt\Goto_($label_name_prev);
+    $t = [];
+    $t_chunk = [];
+
     for ($i = 0; $i < $n; ++$i) {
-        $t_chunk[]              = $stmts[$i];
-        if (count($t_chunk)>=$chunk_size)
-        {
-            $label              = array(new PhpParser\Node\Stmt\Label($label_name_prev));
-            $label_name         = $scrambler->scramble($scrambler->generate_label_name());
-            $goto               = array(new PhpParser\Node\Stmt\Goto_($label_name));
-            $t[]                = array_merge($label,$t_chunk,$goto);
-            $label_name_prev    = $label_name;
-            $t_chunk            = array();
+        $t_chunk[] = $stmts[$i];
+
+        if (count($t_chunk) >= $chunk_size) {
+            $label = [new PhpParser\Node\Stmt\Label($label_name_prev)];
+            $label_name = $scrambler->scramble($scrambler->generate_label_name());
+            $goto = [new PhpParser\Node\Stmt\Goto_($label_name)];
+            $t[] = array_merge($label, $t_chunk, $goto);
+            $label_name_prev = $label_name;
+            $t_chunk = [];
         }
     }
     if (count($t_chunk) > 0) {
-        $label              = array(new PhpParser\Node\Stmt\Label($label_name_prev));
-        $label_name         = $scrambler->scramble($scrambler->generate_label_name());
-        $goto               = array(new PhpParser\Node\Stmt\Goto_($label_name));
-        $t[]                = array_merge($label,$t_chunk,$goto);
-        $label_name_prev    = $label_name;
-        $t_chunk            = array();
+        $label = [new PhpParser\Node\Stmt\Label($label_name_prev)];
+        $label_name = $scrambler->scramble($scrambler->generate_label_name());
+        $goto = [new PhpParser\Node\Stmt\Goto_($label_name)];
+        $t[] = array_merge($label, $t_chunk, $goto);
+        $label_name_prev = $label_name;
+        $t_chunk = [];
     }
-    
+
     $last_label             = new PhpParser\Node\Stmt\Label($label_name);
     shuffle($t);
     $stmts = [];

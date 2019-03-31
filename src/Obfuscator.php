@@ -39,8 +39,8 @@ class Obfuscator implements ObfuscatorInterface
      */
     private function checkPhpVersion()
     {
-        if (PHP_VERSION_ID < 70000) {
-            throw new \Exception('PHP version under 7.0Please run this on PHP >= 7.0');
+        if (PHP_VERSION_ID < 70100) {
+            throw new \Exception('PHP version under 7.1, please run this on PHP >= 7.1');
         }
     }
 
@@ -60,7 +60,7 @@ class Obfuscator implements ObfuscatorInterface
         }
 
         if (isset($config['obfuscation_options'])) {
-            $this->configuration['obfuscation_options'] = Configuration::getFilteredOptions($config['obfuscation_options']);
+            $this->configuration['obfuscation_options'] = Config::getFilteredOptions($config['obfuscation_options']);
         }
     }
 
