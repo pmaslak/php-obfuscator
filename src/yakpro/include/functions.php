@@ -18,7 +18,6 @@ function obfuscate($filename)
     global $conf;
     global $traverser, $prettyPrinter;
 
-
     $parser = (new ParserFactory)->create(ParserFactory::ONLY_PHP7);
 
     $src_filename = $filename;
@@ -37,7 +36,10 @@ function obfuscate($filename)
 //        fprintf(STDERR,"Obfuscating %s%s",$src_filename,PHP_EOL);
         //var_dump( token_get_all($source));    exit;
         if ($source === '') {
-            if ($conf->allow_and_overwrite_empty_files) return $source;
+            if ($conf->allow_and_overwrite_empty_files) {
+                return $source;
+            }
+
             throw new Exception("Error obfuscating [$src_filename]: php_strip_whitespace returned an empty string!");
         }
 
@@ -58,7 +60,7 @@ function obfuscate($filename)
         }
 
         //Use PHP-Parser function to traverse the syntax tree and obfuscate names
-        $stmts  = $traverser->traverse($stmts);
+        $stmts = $traverser->traverse($stmts);
 
         if ($conf->shuffle_stmts && (count($stmts) > 2))
         {
@@ -70,18 +72,24 @@ function obfuscate($filename)
                 if ( $stmt instanceof PhpParser\Node\Stmt\Use_ ) $last_use_stmt_pos = $i;
             }
 
-            if ($last_use_stmt_pos<0)   { $stmts_to_shuffle = $stmts;                                   $stmts = array();                                       }
-            else                        { $stmts_to_shuffle = array_slice($stmts,$last_use_stmt_pos+1); $stmts = array_slice($stmts,0,$last_use_stmt_pos+1);    }
-            
-            $stmts      = array_merge($stmts,shuffle_statements($stmts_to_shuffle));
-            $stmts[]    = $last_inst;
+            if ($last_use_stmt_pos < 0) {
+                $stmts_to_shuffle = $stmts;
+                $stmts = [];
+            } else {
+                $stmts_to_shuffle = array_slice($stmts, $last_use_stmt_pos + 1);
+                $stmts = array_slice($stmts, 0, $last_use_stmt_pos + 1);
+            }
+
+            $stmts = array_merge($stmts, shuffle_statements($stmts_to_shuffle));
+            $stmts[] = $last_inst;
         }
 
         //Use PHP-Parser function to output the obfuscated source, taking the modified obfuscated syntax tree as input
         $code = trim($prettyPrinter->prettyPrintFile($stmts));
 
         if (isset($conf->strip_indentation) && $conf->strip_indentation) {
-            $code = remove_whitespaces($code);
+            $core = new \pmaslak\PhpObfuscator\Core();
+            $code = $core->minifyPhp($code);
         }
 
         $endcode = substr($code,6);
@@ -106,9 +114,7 @@ function obfuscate($filename)
         }
 
         return trim($code);
-    }
-    catch (Exception $e)
-    {
+    } catch (Exception $e) {
         fprintf(STDERR,"Obfuscator Parse Error [%s]:%s\t%s%s", $filename,PHP_EOL, $e->getMessage(),PHP_EOL);
         return null;
     }
@@ -158,7 +164,7 @@ function check_config_file($filename)
 
 function create_context_directories($target_directory)
 {
-    foreach (array("$target_directory/yakpro-po", "$target_directory/yakpro-po/obfuscated", "$target_directory/yakpro-po/context") as $dummy => $dir) {
+    foreach (["$target_directory/yakpro-po", "$target_directory/yakpro-po/obfuscated", "$target_directory/yakpro-po/context"] as $dummy => $dir) {
         if (!file_exists($dir)) mkdir($dir,0777,true);
 
         if (!file_exists($dir)) {
@@ -168,21 +174,6 @@ function create_context_directories($target_directory)
     }
     $target_directory = realpath($target_directory);
     if (!file_exists("$target_directory/yakpro-po/.yakpro-po-directory")) touch("$target_directory/yakpro-po/.yakpro-po-directory");
-}
-
-function confirm($str)
-{
-    global $conf;
-    if (!$conf->confirm) {
-        return true;
-    }
-
-    for (; ;) {
-        fprintf(STDERR,"%s [y/n] : ",$str);
-        $r = strtolower(trim(fgets(STDIN)));
-        if ($r=='y')    return true;
-        if ($r=='n')    return false;
-    }
 }
 
 function shuffle_get_chunk_size(&$stmts)
@@ -251,7 +242,7 @@ function shuffle_statements($stmts)
         $t_chunk = [];
     }
 
-    $last_label             = new PhpParser\Node\Stmt\Label($label_name);
+    $last_label = new PhpParser\Node\Stmt\Label($label_name);
     shuffle($t);
     $stmts = [];
     $stmts[] = $first_goto;
@@ -260,16 +251,7 @@ function shuffle_statements($stmts)
         foreach($stmt as $dummy => $inst) $stmts[] = $inst;
     }
     $stmts[] = $last_label;
+
     return $stmts;
 }
 
-function remove_whitespaces($str)
-{
-    $tmp_filename = @tempnam(sys_get_temp_dir(),'po-');
-    file_put_contents($tmp_filename,$str);
-    $str = php_strip_whitespace($tmp_filename);  // can remove more whitespaces
-    unlink($tmp_filename);
-    return $str;
-}
-
-?>

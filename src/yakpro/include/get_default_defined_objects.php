@@ -11,10 +11,10 @@
 //          Use and abuse at your own risks.
 //========================================================================
 
-$t_pre_defined_classes          = array_flip(array_map('strtolower', get_declared_classes()));
-$t_pre_defined_interfaces       = array_flip(array_map('strtolower', get_declared_interfaces()));
-$t_pre_defined_traits           = function_exists('get_declared_traits') ? array_flip(array_map('strtolower', get_declared_traits())) : []; 
-$t_pre_defined_classes          = array_merge($t_pre_defined_classes,$t_pre_defined_interfaces,$t_pre_defined_traits);
+$t_pre_defined_classes = array_flip(array_map('strtolower', get_declared_classes()));
+$t_pre_defined_interfaces = array_flip(array_map('strtolower', get_declared_interfaces()));
+$t_pre_defined_traits = function_exists('get_declared_traits') ? array_flip(array_map('strtolower', get_declared_traits())) : [];
+$t_pre_defined_classes = array_merge($t_pre_defined_classes, $t_pre_defined_interfaces, $t_pre_defined_traits);
 
 $t_pre_defined_class_methods = [];
 $t_pre_defined_class_methods_by_class = [];

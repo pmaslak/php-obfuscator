@@ -155,9 +155,6 @@ $pos = array_search('--obfuscate-namespace-name',$t_args);          if (isset($p
 $pos = array_search('--no-obfuscate-label-name',$t_args);           if (isset($pos) && ($pos!==false)) { $conf->obfuscate_label_name            = false; array_splice($t_args,$pos,1); }
 $pos = array_search('--obfuscate-label-name',$t_args);              if (isset($pos) && ($pos!==false)) { $conf->obfuscate_label_name            = true;  array_splice($t_args,$pos,1); }
 
-
-
-
 $pos = array_search('--scramble-mode',$t_args);
 
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
