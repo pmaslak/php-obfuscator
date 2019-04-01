@@ -4,7 +4,7 @@
  * @author Pawel Maslak <pawel@maslak.it>
  */
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../../../../vendor/autoload.php';
 
 require_once 'include/get_default_defined_objects.php';
 
