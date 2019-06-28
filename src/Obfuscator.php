@@ -14,10 +14,13 @@ class Obfuscator implements ObfuscatorInterface
     public $processedFiles = 0;
     public $lastProcessTime = 0;
 
+    private $core;
+
     function __construct(array $config)
     {
         $this->checkPhpVersion();
         $this->setObfuscatorDir();
+        $this->core = new Core();
         $this->injectConfiguration($config);
     }
 
@@ -139,11 +142,6 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
-    /**
-     * @param $source
-     * @param $target
-     * @throws \Exception
-     */
     private function processFile($source, $target)
     {
         $parameters = Config::getObfuscationOptions();

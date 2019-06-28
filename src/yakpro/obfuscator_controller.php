@@ -3,8 +3,11 @@
  * @author Pawel Maslak <pawel@maslak.it>
  */
 
+use pmaslak\PhpObfuscator\Scrambler;
+use pmaslak\PhpObfuscator\MyNodeVisitor;
+
 $t_scrambler = [];
-$parserElementTypes = ['variable','function','method','property','class','class_constant','constant','label'];
+$parserElementTypes = ['variable', 'function', 'method', 'property', 'class', 'class_constant', 'constant', 'label'];
 
 foreach ($parserElementTypes as $scramble_what) {
     $t_scrambler[$scramble_what] = new Scrambler($scramble_what, $conf, ($process_mode == 'directory') ? $target_directory : null);

@@ -10,7 +10,7 @@ use pmaslak\PhpObfuscator\Obfuscator;
 
 $obfuscator = new Obfuscator([
     'debug' => false,
-    'allowed_mime_types' => ['text/x-php'],
+    'allowed_mime_types' => ['text/x-php', 'text/x-c++'],
     'obfuscation_options' => ['no-obfuscate-variable-name', 'no-obfuscate-method-name', 'no-obfuscate-class-name', 'no-obfuscate-property-name']
 ]);
 

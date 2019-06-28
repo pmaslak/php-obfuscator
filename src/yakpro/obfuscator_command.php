@@ -4,22 +4,26 @@
  * @author Pawel Maslak <pawel@maslak.it>
  */
 
-require __DIR__ . '/../../../../../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 require_once 'include/get_default_defined_objects.php';
-
 use pmaslak\PhpObfuscator;
+use pmaslak\PhpObfuscator\MyPrettyPrinter;
+use pmaslak\PhpObfuscator\Config;
 use PhpParser\Error;
 use PhpParser\PrettyPrinter;
 
-require_once 'include/classes/scrambler.php';
+Config::$preDefinedClasses = array_flip(array_map('strtolower', get_declared_classes()));
+Config::$preDefinedInterfaces = array_flip(array_map('strtolower', get_declared_interfaces()));
+Config::$preDefinedTraits = function_exists('get_declared_traits') ? array_flip(array_map('strtolower', get_declared_traits())) : [];
+Config::$preDefinedClasses = array_merge(Config::$preDefinedClasses, Config::$preDefinedInterfaces, Config::$preDefinedTraits);
+
+
 require_once 'include/functions.php';
 include      'include/retrieve_config_and_arguments.php';
-require_once 'include/classes/parser_extensions/my_pretty_printer.php';
-require_once 'include/classes/parser_extensions/my_node_visitor.php';
 
 if ($conf->obfuscate_string_literal) {
-    $prettyPrinter = new myPrettyprinter;
+    $prettyPrinter = new MyPrettyPrinter;
 } else {
     $prettyPrinter = new PrettyPrinter\Standard;
 }

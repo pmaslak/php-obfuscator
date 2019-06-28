@@ -11,7 +11,10 @@
 //          Use and abuse at your own risks.
 //========================================================================
 
-class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
+namespace pmaslak\PhpObfuscator;
+use PhpParser;
+
+class MyPrettyPrinter extends PhpParser\PrettyPrinter\Standard
 {
     private function obfuscate_string($str)
     {
@@ -44,5 +47,3 @@ class myPrettyprinter extends PhpParser\PrettyPrinter\Standard
         return '"' . $result . '"';
     }
 }
-
-?>

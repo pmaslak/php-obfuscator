@@ -13,7 +13,7 @@ class Config
     private static $yak_version = '2.0.4';//just denture for now
     private static $debug = false;
     private static $obfuscationOptions = [];
-    private static $allowedMimeTypes = ['text/x-php'];
+    private static $allowedMimeTypes = ['text/x-php', 'text/x-c++'];
 
     public $t_ignore_pre_defined_classes    = 'all';        // 'all' (default value) , 'none',  or array of pre-defined classes that you use in your software:
     //      ex: array('Exception', 'PDO', 'PDOStatement', 'PDOException');
@@ -136,6 +136,10 @@ class Config
         'scramble-mode' => 'force scramble mode',
         'scramble-length'
     ];
+
+    public static $preDefinedClasses = [];
+    public static $preDefinedInterfaces = [];
+    public static $preDefinedTraits = [];
 
     /**
      * @return string

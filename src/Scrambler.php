@@ -1,20 +1,9 @@
 <?php
-//========================================================================
-// Author:  Pascal KISSIAN
-// Resume:  http://pascal.kissian.net
-//
-// Copyright (c) 2015-2019 Pascal KISSIAN
-//
-// Published under the MIT License
-//          Consider it as a proof of concept!
-//          No warranty of any kind.
-//          Use and abuse at your own risks.
-//========================================================================
+/**
+ * @author Pawel Maslak <pawel@maslak.it>
+ */
 
-// case-sensitive:      variable names, constant name, array keys, class properties, labels
-// case-insensitive:    function names, class names, class method names, namespaces, keywords and constructs
-// classes, interfaces, and traits share the same internal naming_space! only a single Scrambler instance for all of them!
-
+namespace pmaslak\PhpObfuscator;
 
 class Scrambler
 {
@@ -73,7 +62,7 @@ class Scrambler
         $this->scramble_type        = $type;
         $this->t_first_chars        = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $this->t_chars              = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
-        $this->r                    = md5(microtime(true));     // random seed
+        $this->r                    = md5(microtime(true));
         $this->t_scramble           = [];
         $this->silent               = $conf->silent;
 
@@ -97,6 +86,7 @@ class Scrambler
                     $this->scramble_mode = 'identifier';
             }
         }
+
         $this->l1                   = strlen($this->t_first_chars)-1;
         $this->l2                   = strlen($this->t_chars      )-1;
         $this->scramble_length_min  = 2;
@@ -129,6 +119,7 @@ class Scrambler
                 $this->case_sensitive       = true;
                 $this->t_ignore             = array_flip($this->t_reserved_function_names);
                 $this->t_ignore             = array_merge($this->t_ignore,get_defined_constants(false));
+
                 if ($conf->t_ignore_pre_defined_classes != 'none') {
                     if ($conf->t_ignore_pre_defined_classes=='all') $this->t_ignore = array_merge($this->t_ignore,$t_pre_defined_class_constants);
                     if (is_array($conf->t_ignore_pre_defined_classes)) {
@@ -159,26 +150,27 @@ class Scrambler
                     $this->t_ignore_prefix  = $t;
                 }
                 break;
-             case 'function':
+            case 'function':
                 $this->case_sensitive       = false;
                 $this->t_ignore             = array_flip($this->t_reserved_function_names);
                 $t                          = get_defined_functions();                  $t = array_map('strtolower',$t['internal']);    $t = array_flip($t);
                 $this->t_ignore             = array_merge($this->t_ignore,$t);
-                 if (isset($conf->t_ignore_functions)) {
+
+                if (isset($conf->t_ignore_functions)) {
                     $t                      = $conf->t_ignore_functions;                $t = array_map('strtolower',$t);                $t = array_flip($t);
                     $this->t_ignore         = array_merge($this->t_ignore,$t);
                 }
 
-                 if (isset($conf->t_ignore_functions_prefix)) {
+                if (isset($conf->t_ignore_functions_prefix)) {
                     $t                      = $conf->t_ignore_functions_prefix;         $t = array_map('strtolower',$t);                $t = array_flip($t);
                     $this->t_ignore_prefix  = $t;
-                 }
+                }
                 break;
-           case 'property':
-               $this->case_sensitive = true;
-               $this->t_ignore = array_flip($this->t_reserved_variable_names);
+            case 'property':
+                $this->case_sensitive = true;
+                $this->t_ignore = array_flip($this->t_reserved_variable_names);
 
-               if ($conf->t_ignore_pre_defined_classes != 'none') {
+                if ($conf->t_ignore_pre_defined_classes != 'none') {
                     if ($conf->t_ignore_pre_defined_classes=='all') $this->t_ignore = array_merge($this->t_ignore,$t_pre_defined_class_properties);
 
                     if (is_array($conf->t_ignore_pre_defined_classes)) {
@@ -187,17 +179,17 @@ class Scrambler
                     }
                 }
 
-               if (isset($conf->t_ignore_properties)) {
-                   $t = $conf->t_ignore_properties;
-                   $t = array_flip($t);
-                   $this->t_ignore = array_merge($this->t_ignore, $t);
-               }
+                if (isset($conf->t_ignore_properties)) {
+                    $t = $conf->t_ignore_properties;
+                    $t = array_flip($t);
+                    $this->t_ignore = array_merge($this->t_ignore, $t);
+                }
 
-               if (isset($conf->t_ignore_properties_prefix)) {
-                   $t = $conf->t_ignore_properties_prefix;
-                   $t = array_flip($t);
-                   $this->t_ignore_prefix = $t;
-               }
+                if (isset($conf->t_ignore_properties_prefix)) {
+                    $t = $conf->t_ignore_properties_prefix;
+                    $t = array_flip($t);
+                    $this->t_ignore_prefix = $t;
+                }
                 break;
             case 'class':           // same instance is used for scrambling classes, interfaces, and traits.  and namespaces... for aliasing
                 $this->case_sensitive       = false;
@@ -259,10 +251,10 @@ class Scrambler
                 $this->case_sensitive       = false;
                 if ($conf->parser_mode=='ONLY_PHP7')    $this->t_ignore = array();      // in php7 method names can be keywords
                 else                                    $this->t_ignore = array_flip($this->t_reserved_function_names);
-                
+
                 $t                          = array_flip($this->t_reserved_method_names);
                 $this->t_ignore             = array_merge($this->t_ignore,$t);
-                
+
                 $t                          = get_defined_functions();                  $t = array_map('strtolower',$t['internal']);    $t = array_flip($t);
                 $this->t_ignore             = array_merge($this->t_ignore,$t);
                 if ($conf->t_ignore_pre_defined_classes!='none')
@@ -300,6 +292,7 @@ class Scrambler
                 }
                 break;
         }
+
         if (isset($target_directory))                                   // the constructor will restore previous saved context if exists
         {
             $this->context_directory = $target_directory;
@@ -343,6 +336,7 @@ class Scrambler
         $this->r    = str_shuffle(md5($c2.$s.md5($this->r)));           // 32 chars random hex number derived from $s and lot of pepper and salt
 
         $s  = $c1;
+
         switch($this->scramble_mode)
         {
             case 'numeric':
@@ -406,11 +400,9 @@ class Scrambler
 
         return isset($this->t_rscramble[$s]) ? $this->t_rscramble[$s] : '';
     }
-    
+
     public function generate_label_name($prefix = "!label")
     {
         return $prefix . ($this->label_counter++);
     }
 }
-
-?>

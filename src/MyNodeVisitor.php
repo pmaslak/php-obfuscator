@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author Pawel Maslak <pawel@maslak.it>
+ */
+
+namespace pmaslak\PhpObfuscator;
+use PhpParser;
+
 //========================================================================
 // Author:  Pascal KISSIAN
 // Resume:  http://pascal.kissian.net
@@ -45,7 +52,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
         }
         return '';
     }
-    
+
     private function set_identifier_name(PhpParser\Node &$node,$name)
     {
         if ($node instanceof PhpParser\Node\Identifier || $node instanceof PhpParser\Node\VarLikeIdentifier) {
@@ -67,7 +74,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                 $label_loop_break_name      = $scrambler->scramble($scrambler->generate_label_name());
                 $label_loop_continue_name   = $scrambler->scramble($scrambler->generate_label_name());
                 $this->t_loop_stack[] = array($label_loop_break_name,$label_loop_continue_name);
-           }
+            }
         }
 
         if ($node instanceof PhpParser\Node\Stmt\Class_) {
@@ -207,11 +214,11 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                 }
             }
             if (  ($node instanceof PhpParser\Node\Expr\New_)
-               || ($node instanceof PhpParser\Node\Expr\StaticCall)
-               || ($node instanceof PhpParser\Node\Expr\StaticPropertyFetch)
-               || ($node instanceof PhpParser\Node\Expr\ClassConstFetch)
-               || ($node instanceof PhpParser\Node\Expr\Instanceof_)
-               ) {
+                || ($node instanceof PhpParser\Node\Expr\StaticCall)
+                || ($node instanceof PhpParser\Node\Expr\StaticPropertyFetch)
+                || ($node instanceof PhpParser\Node\Expr\ClassConstFetch)
+                || ($node instanceof PhpParser\Node\Expr\Instanceof_)
+            ) {
                 if (isset($node->{'class'}->parts)) {
                     $parts = $node->{'class'}->parts;
                     $name  = $parts[count($parts)-1];
@@ -257,7 +264,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                                 $node_modified = true;
                             }
                         }
-                     }
+                    }
                 }
             }
         }
@@ -303,7 +310,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                     }
                 }
             }
-       }
+        }
 
         if ($conf->obfuscate_trait_name) {
             $scrambler = $t_scrambler['class'];
@@ -692,7 +699,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                     }
                     $new_nodes_1        = array_merge($new_nodes_1,$goto_endif);
                     $new_nodes_2        = array_merge($new_nodes_2,$label_endif);
-                                        return array_merge($new_nodes_1,$new_nodes_2);
+                    return array_merge($new_nodes_1,$new_nodes_2);
                 }
                 else                                    // no elseif :  if , else
                 {
@@ -788,7 +795,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
 
                 $label_break            = array(new PhpParser\Node\Stmt\Label($label_loop_break_name));
                 $node->stmts[]          = new PhpParser\Node\Stmt\Label($label_loop_continue_name);
-                                        $this->shuffle_stmts($node);
+                $this->shuffle_stmts($node);
                 return                  array_merge(array($node),$label_break);
             }
 
@@ -872,15 +879,15 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
 
         if ($conf->shuffle_stmts) {
             if (    ($node instanceof PhpParser\Node\Stmt\Function_)
-                 || ($node instanceof PhpParser\Node\Expr\Closure)
-                 || ($node instanceof PhpParser\Node\Stmt\ClassMethod)
-                 || ($node instanceof PhpParser\Node\Stmt\Foreach_)     // occurs when $conf->obfuscate_loop_statement is set to false
-                 || ($node instanceof PhpParser\Node\Stmt\If_)          // occurs when $conf->obfuscate_loop_statement is set to false
-                 || ($node instanceof PhpParser\Node\Stmt\TryCatch)
-                 || ($node instanceof PhpParser\Node\Stmt\Catch_)
-                 || ($node instanceof PhpParser\Node\Stmt\Case_)
-                 //|| ($node instanceof PhpParser\Node\Stmt\Namespace_)
-              )
+                || ($node instanceof PhpParser\Node\Expr\Closure)
+                || ($node instanceof PhpParser\Node\Stmt\ClassMethod)
+                || ($node instanceof PhpParser\Node\Stmt\Foreach_)     // occurs when $conf->obfuscate_loop_statement is set to false
+                || ($node instanceof PhpParser\Node\Stmt\If_)          // occurs when $conf->obfuscate_loop_statement is set to false
+                || ($node instanceof PhpParser\Node\Stmt\TryCatch)
+                || ($node instanceof PhpParser\Node\Stmt\Catch_)
+                || ($node instanceof PhpParser\Node\Stmt\Case_)
+                //|| ($node instanceof PhpParser\Node\Stmt\Namespace_)
+            )
             {
                 if ($this->shuffle_stmts($node))  $node_modified  = true;
             }
@@ -890,7 +897,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                 if (isset($node->{'else'})) {
                     if ($this->shuffle_stmts($node->{'else'}))  $node_modified  = true;
                 }
-                
+
                 $elseif                 = $node->elseifs;
                 if (isset($elseif) && count($elseif))       // elseif mode
                 {
@@ -900,9 +907,7 @@ class MyNodeVisitor extends PhpParser\NodeVisitorAbstract       // all parsing a
                 }
             }
         }
-        
+
         if ($node_modified) return $node;
     }
 }
-
-?>
