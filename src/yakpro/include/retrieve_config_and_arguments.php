@@ -18,45 +18,58 @@ $yakpro_po_dirname      = $t_yakpro_po_pathinfo['dirname'];
 $config_filename        = '';
 $process_mode           = '';   // can be: 'file' or 'directory'
 
-$pos = array_search('-h',$t_args); if (!isset($pos) || ($pos===false)) $pos = array_search('--help',$t_args);
+$pos = array_search('-h', $t_args);
+if (!isset($pos) || ($pos === false)) {
+    $pos = array_search('--help', $t_args);
+}
 
 $pos = array_search('--config-file',$t_args);
 
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
-    $argument_config_filename = $t_args[$pos+1];
-    array_splice($t_args,$pos,2);           // remove the 2 args and reorder
-} else $argument_config_filename = '';
+    $argument_config_filename = $t_args[$pos + 1];
+    array_splice($t_args, $pos, 2);           // remove the 2 args and reorder
+} else {
+    $argument_config_filename = '';
+}
 
 $pos = array_search('-o',$t_args); if (!isset($pos) || ($pos===false)) $pos = array_search('--output-file',$t_args);
 
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
-    $target = $t_args[$pos+1];
-    array_splice($t_args,$pos,2);           // remove the 2 args and reorder
-} else $target = '';
+    $target = $t_args[$pos + 1];
+    array_splice($t_args, $pos, 2);           // remove the 2 args and reorder
+} else {
+    $target = '';
+}
 
-$pos = array_search('--silent',$t_args);
+$pos = array_search('--silent', $t_args);
 if (isset($pos) && ($pos !== false)) {
     $force_conf_silent = true;
-    array_splice($t_args,$pos,1);           // remove the arg and reorder
-} else $force_conf_silent = false;;
+    array_splice($t_args, $pos, 1);           // remove the arg and reorder
+} else {
+    $force_conf_silent = false;;
+}
 
-$pos = array_search('--whatis',$t_args);
+$pos = array_search('--whatis', $t_args);
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
-    $whatis = $t_args[$pos+1];
-    array_splice($t_args,$pos,2);           // remove the 2 args and reorder
+    $whatis = $t_args[$pos + 1];
+    array_splice($t_args, $pos, 2);           // remove the 2 args and reorder
     $force_conf_silent = true;
-} else $whatis = '';
+} else {
+    $whatis = '';
+}
 
-$pos = array_search('--debug',$t_args);
+$pos = array_search('--debug', $t_args);
 if (isset($pos) && ($pos !== false)) {
     $debug_mode = true;
-    array_splice($t_args,$pos,1);           // remove the arg and reorder
-} else $debug_mode = false;
+    array_splice($t_args, $pos, 1);           // remove the arg and reorder
+} else {
+    $debug_mode = false;
+}
 
 $pos = array_search('--debug',$t_args);     // repeated --debug
 if (isset($pos) && ($pos !== false)) {
     $debug_mode = 2;
-    array_splice($t_args,$pos,1);           // remove the arg and reorder
+    array_splice($t_args, $pos, 1);           // remove the arg and reorder
 }
 
 
@@ -80,7 +93,12 @@ if ( $x                  !==false)                          $t_where[]  = "$x/co
                                                             $t_where[]  = "/usr/local/YAK/yakpro-po/$config_file_namepart"; // /usr/local/YAK/yakpro-po
                                                             $t_where[]  = "$yakpro_po_dirname/yakpro-po.cnf";               // source_code_directory/default_conf_filename
 
-foreach($t_where As $dummy => $where) if (check_config_file($where)) { $config_filename = $where; break; }
+foreach ($t_where As $dummy => $where) {
+    if (check_config_file($where)) {
+        $config_filename = $where;
+        break;
+    }
+}
 
 $conf = new \pmaslak\PhpObfuscator\Config();
 
@@ -99,10 +117,10 @@ if ($config_filename == '') {
 if (!$conf->silent) fprintf(STDERR,"Info:\tyakpro-po version = %s%s", pmaslak\PhpObfuscator\Config::getYakVersion(),PHP_EOL);
 
 
-$pos = array_search('-y',$t_args);
+$pos = array_search('-y', $t_args);
 if (isset($pos) && ($pos !== false)) {
     $conf->confirm = false;
-    array_splice($t_args,$pos,1);           // remove the arg and reorder
+    array_splice($t_args, $pos, 1);           // remove the arg and reorder
 }
 
 $pos = array_search('-s',$t_args);                                  if (isset($pos) && ($pos!==false)) { $conf->strip_indentation               = false; array_splice($t_args,$pos,1); }
@@ -158,20 +176,19 @@ $pos = array_search('--obfuscate-label-name',$t_args);              if (isset($p
 $pos = array_search('--scramble-mode',$t_args);
 
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
-    $conf->scramble_mode = $t_args[$pos+1];
-    array_splice($t_args,$pos,2);           // remove the 2 args and reorder
+    $conf->scramble_mode = $t_args[$pos + 1];
+    array_splice($t_args, $pos, 2);           // remove the 2 args and reorder
 }
 
 $pos = array_search('--scramble-length',$t_args);
 
 if (isset($pos) && ($pos !== false) && isset($t_args[$pos + 1])) {
-    $conf->scramble_length = $t_args[$pos+1]+0;
-    array_splice($t_args,$pos,2);           // remove the 2 args and reorder
+    $conf->scramble_length = $t_args[$pos + 1] + 0;
+    array_splice($t_args, $pos, 2);           // remove the 2 args and reorder
 }
 
 
-switch(count($t_args))
-{
+switch (count($t_args)) {
     case 0:
         if (isset($conf->source_directory) && isset($conf->target_directory)) {
             throw new \Exception('Trying to obfuscate all directory instead of use single file');
@@ -214,7 +231,9 @@ switch(count($t_args))
                 $process_mode       = 'directory';
                 $source_directory   = $source_file;
                 $target_directory   = $target;
-                if (($target_directory=='') && isset($conf->target_directory)) $target_directory = $conf->target_directory;
+                if (($target_directory == '') && isset($conf->target_directory)) {
+                    $target_directory = $conf->target_directory;
+                }
 
                 if ($target_directory == '') {
                     fprintf(STDERR,"Error:\tTarget directory is not specified!%s",PHP_EOL);
