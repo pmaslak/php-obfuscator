@@ -5,7 +5,11 @@
 
 namespace pmaslak\PhpObfuscator;
 
+use PhpParser\Node\Stmt\Goto_;
+use PhpParser\Node\Stmt\Label;
+use pmaslak\PhpObfuscator\Config;
 use Oil\Exception;
+use PhpParser\Node\Stmt\Use_;
 use PhpParser\ParserFactory;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
@@ -78,7 +82,6 @@ class Core
         } catch (\Exception $e) {
             throw new \Exception('Cannot proceed file ' . $fileName);
         }
-
 //        try {
 //            $parsedSource = $this->parser->parse($source);
 //        } catch (\Exception $e) {
@@ -106,6 +109,11 @@ class Core
         return $result;
     }
 
+    /**
+     * @param string $fileContent
+     * @return string
+     * @throws \Exception
+     */
     private function obfuscate(string $fileContent)
     {
         try {

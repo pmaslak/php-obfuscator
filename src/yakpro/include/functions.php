@@ -132,9 +132,22 @@ function check_preload_file($filename)
             return false;
         }
 
-        $fp     = fopen($filename,"r"); if($fp===false) break;
-        $line   = trim(fgets($fp));     if ($line!='<?php')                                     { fclose($fp); break; }
-        $line   = trim(fgets($fp));     if ($line!='// YAK Pro - Php Obfuscator: Preload File') { fclose($fp); break; }
+        $fp = fopen($filename, "r");
+        if ($fp === false) {
+            break;
+        }
+
+        $line = trim(fgets($fp));
+        if ($line != '<?php') {
+            fclose($fp);
+            break;
+        }
+
+        $line = trim(fgets($fp));
+        if ($line != '// YAK Pro - Php Obfuscator: Preload File') {
+            fclose($fp);
+            break;
+        }
         fclose($fp);
         $ok     = true;
         break;

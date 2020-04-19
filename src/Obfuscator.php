@@ -7,6 +7,8 @@
 namespace pmaslak\PhpObfuscator;
 
 
+use ReflectionClass;
+
 class Obfuscator implements ObfuscatorInterface
 {
     private $directory = '';
@@ -137,6 +139,8 @@ class Obfuscator implements ObfuscatorInterface
 
                 if (in_array($mimetype, Config::getAllowedMimeTypes())) {
                     $this->processFile($directory . $fileName, $target . $fileName);
+                } else {
+                    throw new \Exception('Unsupported filetype');
                 }
             }
         }
