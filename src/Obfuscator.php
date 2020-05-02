@@ -62,6 +62,11 @@ class Obfuscator implements ObfuscatorInterface
         if (isset($config['obfuscation_options'])) {
             Config::setObfuscationOptions(Config::getFilteredOptions($config['obfuscation_options']));
         }
+
+        Config::$preDefinedClasses = array_flip(array_map('strtolower', get_declared_classes()));
+        Config::$preDefinedInterfaces = array_flip(array_map('strtolower', get_declared_interfaces()));
+        Config::$preDefinedTraits = function_exists('get_declared_traits') ? array_flip(array_map('strtolower', get_declared_traits())) : [];
+        Config::$preDefinedClasses = array_merge(Config::$preDefinedClasses, Config::$preDefinedInterfaces, Config::$preDefinedTraits);
     }
 
     public function obfuscateFile(string $path, string $target)
@@ -146,30 +151,21 @@ class Obfuscator implements ObfuscatorInterface
         }
     }
 
-    private function processFile($source, $target)
+    /**
+     * Obfuscate and save file in new path
+     *
+     * @param string $sourceFile
+     * @param string $targetFile
+     * @throws \Exception
+     */
+    private function processFile(string $sourceFile, string $targetFile)
     {
         $parameters = Config::getObfuscationOptions();
         $parameters = array_map('trim', $parameters);
 
-        if (empty($parameters)) {
-            $parameters = '';
-        } else {
-            $parameters = '--' . implode(' --', $parameters);
-        }
+        $obfuscatedSource = $this->core->obfuscateFile($sourceFile, $parameters);
 
-        if (Config::isDebug()) {
-            $parameters = ' --debug ' . $parameters;
-        } else {
-            $parameters = ' --silent ' . $parameters;
-        }
-
-        $command = $this->getBaseCommand();
-
-        try {
-            exec($command . $source . ' -o ' . $target . $parameters);
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
+        file_put_contents($targetFile, $obfuscatedSource);
     }
 
     private function getBaseCommand(): string
