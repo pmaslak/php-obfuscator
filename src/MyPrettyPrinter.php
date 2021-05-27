@@ -21,7 +21,7 @@ class MyPrettyPrinter extends PhpParser\PrettyPrinter\Standard
         $l = strlen($str);
         $result = '';
         for ($i = 0; $i < $l; ++$i) {
-            $result .= mt_rand(0, 1) ? "\x" . dechex(ord($str{$i})) : "\\" . decoct(ord($str{$i}));
+            $result .= mt_rand(0, 1) ? "\x" . dechex(ord($str[$i])) : "\\" . decoct(ord($str[$i]));
         }
         return $result;
     }
